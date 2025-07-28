@@ -4,10 +4,24 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "husky",
+    "lint": "nx run-many --target=lint --all",
+    "lint:fix": "pnpm lint --fix",
+    "format": "prettier --write .",
+    "commitlint": "commitlint --edit",
+    "commit-emoji": "scripts/add-emoji-to-commit.sh"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.13.1"
+  "packageManager": "pnpm@10.13.1",
+  "dependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@cspell/eslint-plugin": "^9.2.0",
+    "@nx/js": "^21.3.7",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2"
+  }
 }

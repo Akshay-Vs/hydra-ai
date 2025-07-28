@@ -1,0 +1,104 @@
+# .dockerignore - Reduce build context size
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache
+*.egg-info
+.tox
+.venv
+venv
+env
+.env
+
+# Node.js (for Nx)
+node_modules
+npm-debug.log
+yarn-error.log
+.npm
+.yarn
+
+# Nx
+.nx
+dist
+tmp
+out-tsc
+coverage
+reports
+
+# Documentation
+*.md
+docs/
+README*
+CHANGELOG*
+LICENSE*
+
+# Tests
+tests/
+test/
+*.test.js
+*.test.py
+*.spec.js
+*.spec.py
+
+# Development and CI files
+.github
+.gitlab-ci.yml
+.travis.yml
+.circleci
+Makefile
+docker-compose*.yml
+*.dockerfile
+Dockerfile.dev
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.tmp
+
+# Large model files (download at runtime)
+*.bin
+*.safetensors
+*.h5
+*.pkl
+*.joblib
+
+# Cache directories
+.cache
+.mypy_cache
+.ruff_cache
+
+# Build artifacts
+build/
+*.egg
+*.whl

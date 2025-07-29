@@ -13,3 +13,33 @@ body {
 /*  	background: #ff646472; */
 /* } */
 
+$accent: oklch(0.8123 0.0646 230.66);
+$text: oklch(0.1 0.01 0);
+
+::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+* {
+  -ms-overflow-style: auto;
+  -moz-scrollbar-width: 4px;
+  scrollbar-width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: 000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $text;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: $accent;
+}
+
+::selection {
+  background: $accent;
+  color: #000;
+}

@@ -10,11 +10,13 @@
   --color-accent-dark: oklch(0.8123 0.0646 230.66);
   --color-background-dark: oklch(0.2097 0.008 274.53);
   --color-text-dark: oklch(1 0 0);
-  --color-surface-dark: oklch(0.3528 0.007 274.78);
   --color-dull-dark: oklch(0.8975 0 0);
   --color-active-dark: oklch(0.3287 0.0109 236.93);
+  --color-surface-1-dark: oklch(0.3528 0.007 274.78);
   --color-surface-2-dark: oklch(0.2399 0.0078 274.62);
   --color-surface-3-dark: oklch(0.2473 0.0081 264.42);
+
+  --radius-default: 20px;
 }
 
 @layer utilities {

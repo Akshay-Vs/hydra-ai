@@ -1,5 +1,5 @@
 import { cn } from '@hydra/ui/libs/utils';
-import type { BaseProps } from '@/styles/types/baseprops';
+import type { BaseProps } from '@/types/baseprops';
 
 const Block = ({ className, children }: BaseProps) => {
   return (

@@ -1,9 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Bell, HomeIcon, Link as Link2, Waypoints } from 'lucide-react';
+import { Button } from '@hydra/ui/button';
+import { Bell, HomeIcon, Link as Link2, Settings, User2, Waypoints } from 'lucide-react';
 
 import Logo from '@/public/images/Hydra_Logo.svg';
 import IconButton from '../tokens/icon-button';
+import OrgSelectorDropDown from '../tokens/org-selector-dropdown';
 
 const Nav = () => {
   const navButtons = [
@@ -46,9 +48,33 @@ const Nav = () => {
         <div className="bg-surface-2-dark h-full w-fit center gap-2 border-2 border-border-dark rounded-default p-1">
           {navButtons.map(button => (
             <Link key={button.id} href={button.href}>
-              <IconButton isActive={button.isActive}>{button.icon}</IconButton>
+              <IconButton isActive={button.isActive} tabindex={-1}>
+                {button.icon}
+              </IconButton>
             </Link>
           ))}
+        </div>
+
+        <OrgSelectorDropDown />
+      </div>
+
+      <div className="flex center gap-6 h-full">
+        <div className="h-3 w-3 bg-green-300 rounded-full" />
+
+        <div className="bg-surface-2-dark h-full w-fit center gap-3 border-2 border-border-dark rounded-default p-1">
+          <Button variant="secondary" className="h-full" size="default">
+            Invite Members
+          </Button>
+
+          <div>
+            <IconButton isActive={false}>
+              <Settings className="h-6 w-6" />
+            </IconButton>
+
+            <IconButton isActive={false}>
+              <User2 className="h-6 w-6" />
+            </IconButton>
+          </div>
         </div>
       </div>
     </nav>

@@ -1,5 +1,6 @@
 import InfoBlock from '@/components/sections/info-block';
 import LiveTail from '@/components/sections/live-tail';
+import { RequestProcessed } from '@/components/sections/request-processed';
 import Block from '@/components/wrappers/block';
 
 export default function Home() {
@@ -16,7 +17,9 @@ export default function Home() {
         <Block>
           <LiveTail />
         </Block>
-        <Block>Graph 2</Block>
+        <Block>
+          <RequestProcessed />
+        </Block>
       </div>
     </div>
   );

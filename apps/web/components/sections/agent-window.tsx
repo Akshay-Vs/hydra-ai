@@ -1,3 +1,4 @@
+import AgentInput from '../tokens/agent-input';
 import AgentSelector from '../tokens/agent-selector';
 import LogEntry from '../tokens/log-entry';
 
@@ -121,14 +122,7 @@ const AgentWindow = () => {
         ))}
       </div>
       <div className="w-full h-[10%] center flex gap-4 items-center">
-        <div className="border-b border-b-active-dark full focus-within:border-accent-dark/60 px-2 center gap-4">
-          <input
-            type="text"
-            placeholder="Send instructions to agent"
-            className="full border-none outline-none ring-0 text-lg"
-          />
-        </div>
-
+        <AgentInput />
         <AgentSelector />
       </div>
     </div>

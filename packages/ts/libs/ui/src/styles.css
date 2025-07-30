@@ -39,6 +39,18 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-border-dark: oklch(0.3596 0.0074 264.48);
+  --color-accent-dark: oklch(0.8123 0.0646 230.66);
+  --color-background-dark: oklch(0.2097 0.008 274.53);
+  --color-text-dark: oklch(1 0 0);
+  --color-dull-dark: oklch(0.8975 0 0);
+  --color-active-dark: oklch(0.3287 0.0109 236.93);
+  --color-surface-1-dark: oklch(0.3528 0.007 274.78);
+  --color-surface-2-dark: oklch(0.2399 0.0078 274.62);
+  --color-surface-3-dark: oklch(0.2473 0.0081 264.42);
+
+  --radius-default: 20px;
 }
 
 :root {
@@ -92,7 +104,7 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(0.3596 0.0074 264.48);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
@@ -114,8 +126,8 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
-

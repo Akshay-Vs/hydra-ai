@@ -17,7 +17,7 @@ export default function Home() {
       </div>
 
       <div className="w-full center gap-4 h-[45vh]">
-        <Block>
+        <Block className="pt-0">
           <LiveTail />
         </Block>
         <Block>

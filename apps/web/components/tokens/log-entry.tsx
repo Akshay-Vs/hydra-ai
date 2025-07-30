@@ -9,7 +9,7 @@ type Props = {
 const LogEntry = ({ text, color, className }: Props) => {
   return (
     <div
-      className={cn('table-cell pr-6 pb-4 font-medium font-mono shrink-0', className)}
+      className={cn('table-cell pr-6 pb-5 font-medium text-lg font-mono shrink-0', className)}
       style={{ color }}
     >
       {text}

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@hydra/ui/button';
 import DatabaseUsageChart from '../tokens/database-usage-metrics';
+import AgentWindow from './agent-window';
 
 const UsageMetrics = () => {
   const tabs = [
@@ -41,8 +42,12 @@ const UsageMetrics = () => {
         ))}
       </div>
 
-      <div className="py-2 full">
-        <DatabaseUsageChart />
+      <div className={`py-2 full ${activeTab === 'database' ? 'flex' : 'hidden'}`}>
+        <DatabaseUsageChart />{' '}
+      </div>
+
+      <div className={`py-2 full ${activeTab === 'agent' ? 'flex' : 'hidden'}`}>
+        <AgentWindow />
       </div>
     </div>
   );

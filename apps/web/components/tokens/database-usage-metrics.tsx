@@ -44,6 +44,20 @@ const DatabaseUsageChart = () => {
         suggestedMax: 200,
       },
     },
+    plugins: {
+      ...lineOptions.plugins,
+      tooltip: {
+        ...lineOptions.plugins?.tooltip,
+        callbacks: {
+          ...lineOptions.plugins?.tooltip?.callbacks,
+          label: context => {
+            const datasetLabel = context.dataset.label ?? '';
+            const value = context.raw;
+            return `${datasetLabel}: ${value}GB`;
+          },
+        },
+      },
+    },
   };
 
   const data: ChartData<'line'> = {
@@ -51,7 +65,7 @@ const DatabaseUsageChart = () => {
     datasets: [
       {
         label: 'TiVector',
-        data: [100, 400, 500, 540, 600, 690, 740],
+        data: [0, 0, 0, 540, 600, 690, 740],
         backgroundColor: '#9F97E4',
         fill: true,
         borderColor: '#9F97E4',
@@ -61,7 +75,7 @@ const DatabaseUsageChart = () => {
       },
       {
         label: 'TiKV',
-        data: [4, 20, 30, 50, 100, 140, 170],
+        data: [0, 0, 20, 50, 100, 140, 170],
         backgroundColor: '#E4D297',
         borderColor: '#E4D297',
         fill: true,
@@ -71,7 +85,7 @@ const DatabaseUsageChart = () => {
       },
       {
         label: 'TiFlash',
-        data: [40, 80, 120, 150, 500, 540, 670],
+        data: [0, 0, 0, 150, 500, 540, 670],
         backgroundColor: '#DA97E4',
         borderColor: '#DA97E4',
         fill: true,
@@ -82,7 +96,7 @@ const DatabaseUsageChart = () => {
     ],
   };
 
-  return <Line options={options} data={data} className="h-56 px-4" />;
+  return <Line options={options} data={data} className="max-h-[calc(45vh-3rem)] px-4" />;
 };
 
 export default DatabaseUsageChart;

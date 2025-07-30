@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div className="col-center gap-4  pt-4">
       <div className="w-full center gap-4 h-[45vh]">
-        <Block className="w-[80%] bg-transparent border-none">
+        <Block className="w-[80%] h-full bg-transparent border-none pt-0">
           <UsageMetrics />
         </Block>
         <Block className="w-[20%] bg-transparent border-none h-full p-0">
@@ -17,7 +17,7 @@ export default function Home() {
       </div>
 
       <div className="w-full center gap-4 h-[45vh]">
-        <Block className="pt-0">
+        <Block className="pt-0 overflow-auto">
           <LiveTail />
         </Block>
         <Block>

@@ -28,7 +28,7 @@ const logs: LogEntryType[] = [
     },
     message: {
       text: 'Anomaly detected in query latency (avg > 2.1s)',
-      color: '#B3CCD9',
+      color: '#879CA7',
     },
   },
   {
@@ -52,7 +52,7 @@ const logs: LogEntryType[] = [
     },
     message: {
       text: 'Restarted affected replica. Monitoring recovery.',
-      color: '#E497A6',
+      color: '#879CA7',
     },
   },
   {
@@ -64,11 +64,94 @@ const logs: LogEntryType[] = [
     },
     message: {
       text: 'Recovery complete. All systems nominal.',
-      color: '#B3CCD9',
+      color: '#879CA7',
+    },
+  },
+  {
+    id: 'clx006',
+    timestamp: '2025-07-29T10:29:34.12Z',
+    source: {
+      name: 'telemetry',
+      color: '#E4B797',
+    },
+    message: {
+      text: 'New ingestion pipeline registered: /pipelines/ingest-main-v2',
+      color: '#879CA7',
+    },
+  },
+  {
+    id: 'clx007',
+    timestamp: '2025-07-29T10:30:45.77Z',
+    source: {
+      name: 'diagnostics',
+      color: '#97B8E4',
+    },
+    message: {
+      text: 'Result: 14 errors, 2 warnings, 184 checks passed',
+      color: '#879CA7',
+    },
+  },
+  {
+    id: 'clx008',
+    timestamp: '2025-07-29T10:32:21.42Z',
+    source: {
+      name: 'autofix',
+      color: '#97E4B5',
+    },
+    message: {
+      text: 'Patched config.yaml with failover=true',
+      color: '#879CA7',
+    },
+  },
+  {
+    id: 'clx009',
+    timestamp: '2025-07-29T10:33:59.90Z',
+    source: {
+      name: 'agent-core',
+      color: '#E4D297',
+    },
+    message: {
+      text: 'New node registered: Node-07 (region=eu-west-2)',
+      color: '#879CA7',
+    },
+  },
+  {
+    id: 'clx010',
+    timestamp: '2025-07-29T10:35:10.22Z',
+    source: {
+      name: 'telemetry',
+      color: '#E4B797',
+    },
+    message: {
+      text: 'Exported logs to https://logs.example.com/export/789fdgheA',
+      color: '#879CA7',
+    },
+  },
+  {
+    id: 'clx011',
+    timestamp: '2025-07-29T10:36:42.88Z',
+    source: {
+      name: 'diagnostics',
+      color: '#97B8E4',
+    },
+    message: {
+      text: 'Disk usage warning: /var/log at 92%',
+      color: '#879CA7',
+    },
+  },
+  {
+    id: 'clx012',
+    timestamp: '2025-07-29T10:38:01.66Z',
+    source: {
+      name: 'autofix',
+      color: '#97E4B5',
+    },
+    message: {
+      text: 'Cleared old logs from /var/log/archive/',
+      color: '#879CA7',
     },
   },
 ];
-
 const LiveTail = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -77,9 +160,9 @@ const LiveTail = () => {
   };
 
   return (
-    <div className="full py-1">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl">Live Trail</h2>
+    <div className="full relative">
+      <div className="flex justify-between items-center sticky top-0 z-10 pb-2 pt-4 bg-surface-3-dark">
+        <h1 className="text-2xl">Live Trail</h1>
         <IconButton isActive={isCollapsed} onClick={toggleCollapse}>
           {isCollapsed ? (
             <UnfoldVertical size={20} className="text-accent-dark" />
@@ -89,11 +172,15 @@ const LiveTail = () => {
         </IconButton>
       </div>
 
-      <div className="table w-auto font-mono mt-4">
+      <div className="table w-auto font-mono mt-4 overflow-auto">
         {logs.map(logGroup => (
           <div key={logGroup.id} className="table-row">
             <LogEntry text={logGroup.timestamp} color="#587584" className="whitespace-nowrap" />
-            <LogEntry text={logGroup.source.name} color={logGroup.source.color} />
+            <LogEntry
+              text={logGroup.source.name}
+              color={logGroup.source.color}
+              className="opacity-85"
+            />
             <LogEntry
               text={logGroup.message.text}
               color={logGroup.message.color}

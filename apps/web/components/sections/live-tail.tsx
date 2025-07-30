@@ -79,7 +79,7 @@ const LiveTail = () => {
   return (
     <div className="full py-1">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl">Live Trail</h2>
+        <h1 className="text-2xl">Live Trail</h1>
         <IconButton isActive={isCollapsed} onClick={toggleCollapse}>
           {isCollapsed ? (
             <UnfoldVertical size={20} className="text-accent-dark" />

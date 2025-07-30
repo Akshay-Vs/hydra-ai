@@ -69,7 +69,7 @@ export const lineOptions: ChartOptions<'line'> = {
       },
     },
     y: {
-      display: false,
+      display: true,
       title: {
         display: true,
         text: 'Value',

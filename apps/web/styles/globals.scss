@@ -17,14 +17,14 @@ $accent: oklch(0.8123 0.0646 230.66);
 $text: oklch(0.1 0.01 0);
 
 ::-webkit-scrollbar {
-  height: 4px;
-  width: 4px;
+  height: 0px;
+  width: 0px;
 }
 
 * {
   -ms-overflow-style: auto;
-  -moz-scrollbar-width: 4px;
-  scrollbar-width: 4px;
+  -moz-scrollbar-width: 0px;
+  scrollbar-width:0px;
 }
 
 ::-webkit-scrollbar-track {

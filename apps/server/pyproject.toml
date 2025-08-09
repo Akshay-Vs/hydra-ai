@@ -1,0 +1,68 @@
+[project]
+name = "server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.116.1",
+    "prometheus-client>=0.22.1",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "python-socketio>=5.13.0",
+    "sentry-sdk[fastapi]>=2.34.1",
+    "structlog>=25.4.0",
+    "uvicorn[standard]>=0.35.0",
+    "websockets>=15.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage>=7.10.2",
+    "httpx>=0.28.1",
+    "mypy>=1.17.1",
+    "pre-commit>=4.2.0",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "python-socketio[client]>=5.13.0",
+    "ruff>=0.12.8",
+]
+prod = [
+    "gunicorn>=21.2.0",
+]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app/main"]
+include = [
+    "app/**",
+    "README.md",
+    "py.typed",
+]
+exclude = [
+    "tests/",
+    "*.pyc",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+select = ["E", "W", "F", "I", "B", "C4", "ARG", "SIM"]
+ignore = ["E501", "W503"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

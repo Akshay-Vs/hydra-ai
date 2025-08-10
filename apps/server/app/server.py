@@ -8,5 +8,4 @@ uvicorn.run(
     port=settings.port,
     log_level=settings.log_level.lower(),
     reload=settings.debug,
-    factory=True,
 )

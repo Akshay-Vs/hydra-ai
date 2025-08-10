@@ -9,6 +9,8 @@ HOST = os.getenv("HOST", "0.0.0")
 PORT = int(os.getenv("PORT", 8000))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
+CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
+
 
 class Settings(BaseSettings):
     app_name: str = "FastAPI SocketIO Server"
@@ -27,6 +29,7 @@ class Settings(BaseSettings):
 
     # Security
     secret_key: Optional[str] = None
+    clerk_secret_key: Optional[str] = CLERK_SECRET_KEY
 
     class Config:
         env_file = ".env"

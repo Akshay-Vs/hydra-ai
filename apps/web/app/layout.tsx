@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Metadata, Viewport } from 'next';
 
 import '@/styles/globals.scss';

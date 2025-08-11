@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+scrape_configs:
+  - job_name: "node-app"
+    static_configs:
+      - targets: ["app:9090"]
+    scrape_interval: 5s
+    metrics_path: "/metrics"
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+remote_write:
+  - url: "http://localhost:9999/v1/write"

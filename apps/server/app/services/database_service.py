@@ -1,5 +1,4 @@
-import os
-from pathlib import Path
+from contextlib import contextmanager
 from app.config.settings import settings
 from app.utils.logging import create_logger
 from sqlmodel import SQLModel, create_engine, Session, Field, select
@@ -16,7 +15,7 @@ DATABASE_URL = settings.database_url.replace(
 )
 
 logger.info("Setting up database connection...")
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=settings.debug)
 
 
 def init_database():
@@ -45,6 +44,11 @@ def seed_database():
             logger.info("Database already seeded with initial data.")
 
 
+@contextmanager
 def get_session():
     with Session(engine) as session:
-        yield session
+        try:
+            yield session
+        except Exception as e:
+            logger.error(f"Error during database session: {e}")
+            session.rollback()

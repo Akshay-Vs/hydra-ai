@@ -264,6 +264,12 @@ wheels = [
 ]
 
 [[package]]
+name = "cuid"
+version = "0.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/55/ca/d323556e2bf9bfb63219fbb849ce61bb830cc42d1b25b91cde3815451b91/cuid-0.4.tar.gz", hash = "sha256:74eaba154916a2240405c3631acee708c263ef8fa05a86820b87d0f59f84e978", size = 4986, upload-time = "2023-03-06T00:41:12.708Z" }
+
+[[package]]
 name = "distlib"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -864,6 +870,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "clerk-backend-api" },
+    { name = "cuid" },
     { name = "dotenv" },
     { name = "fastapi" },
     { name = "prometheus-client" },
@@ -899,6 +906,7 @@ prod = [
 requires-dist = [
     { name = "clerk-backend-api", specifier = ">=3.1.11" },
     { name = "coverage", marker = "extra == 'dev'", specifier = ">=7.10.2" },
+    { name = "cuid", specifier = ">=0.4" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "gunicorn", marker = "extra == 'prod'", specifier = ">=21.2.0" },

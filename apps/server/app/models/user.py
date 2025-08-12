@@ -1,12 +1,13 @@
 from typing import Optional
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 from pydantic import EmailStr
 
 from app.models.enums import UserType
+from cuid import cuid
 
 
 class User(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
+    id: str = Field(default_factory=cuid, primary_key=True)
     username: str = Field(index=True, unique=True, nullable=False)
     email: EmailStr = Field(index=True, unique=True, nullable=False)
     display_name: str = Field(default=None, nullable=True)
@@ -17,13 +18,15 @@ class User(SQLModel, table=True):
     created_at: str = Field(default=None, nullable=False)
     updated_at: str = Field(default=None, nullable=False)
 
+    preferences: "UserPreference" = Relationship(back_populates="user")
+
 
 class UserPreference(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id", nullable=False)
+    id: str = Field(default_factory=cuid, primary_key=True)
+    user_id: str = Field(foreign_key="user.id", nullable=False)
     theme: str = Field(default="light", nullable=False)
     timezone: str = Field(default="UTC", nullable=True)
     language: str = Field(default="en", nullable=True)
     show_notification: bool = Field(default=True, nullable=False)
 
-    user_id: int = Field(default=None, nullable=False, foreign_key="user.id")
+    user: User = Relationship(back_populates="preferences")

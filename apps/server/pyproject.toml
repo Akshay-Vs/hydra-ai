@@ -10,14 +10,17 @@ dependencies = [
     "fastapi>=0.116.1",
     "prometheus-client>=0.22.1",
     "psutil>=7.0.0",
-    "pydantic>=2.11.7",
+    "pydantic[email]>=2.11.7",
     "pydantic-settings>=2.10.1",
+    "pymysql>=1.1.1",
     "python-socketio>=5.13.0",
     "redis>=6.4.0",
     "sentry-sdk[fastapi]>=2.34.1",
+    "sqlmodel>=0.0.24",
     "structlog>=25.4.0",
     "uvicorn[standard]>=0.35.0",
     "websockets>=15.0.1",
+    "cuid>=0.4",
 ]
 
 [project.optional-dependencies]

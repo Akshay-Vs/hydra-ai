@@ -1,13 +1,10 @@
-from fastapi import APIRouter, status, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, status
 from datetime import datetime, timezone
 import psutil
 import socket
-from typing import Dict, Any
 import sys
 import os
 
-from app.config.settings import settings
 
 router = APIRouter()
 

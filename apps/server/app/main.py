@@ -4,12 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.config.settings import settings
-from app.api.routes import health
 from app.utils.logging import setup_logging, create_logger
 
 from app.services.socketio_service import sio
-from app.services.database_service import init_database, seed_database
+from app.services.database_service import init_database#, seed_database
 
+from app.api.routes import health
+from app.api.routes import user_route
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -20,8 +21,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize database
     init_database()
-    seed_database()
-
+    # seed_database()
     yield
 
 
@@ -43,6 +43,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health.router, prefix="/health", tags=["health"])
+app.include_router(user_route.router, prefix="/user", tags=["users"])
 # app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
 
 # Mount Socket.IO

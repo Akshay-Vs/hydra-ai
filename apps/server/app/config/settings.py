@@ -11,8 +11,6 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
 CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
-
 
 class Settings(BaseSettings):
     app_name: str = "FastAPI SocketIO Server"
@@ -35,7 +33,6 @@ class Settings(BaseSettings):
     session_expiry: int = 86400
 
     # Databasee
-    redis_url: str = REDIS_URL
 
     class Config:
         env_file = ".env"

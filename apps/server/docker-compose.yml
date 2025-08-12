@@ -1,0 +1,11 @@
+services:
+  app:
+    image: hydra-server:latest
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
+      - NODE_ENV=production
+      - DEBUG=false
+    ports:
+      - "8000:8000"

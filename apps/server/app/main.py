@@ -1,7 +1,3 @@
-from logging import debug
-from dotenv import load_dotenv
-from pathlib import Path
-
 import socketio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,24 +5,32 @@ from contextlib import asynccontextmanager
 
 from app.config.settings import settings
 from app.api.routes import health
-from app.services.socketio_service import sio
 from app.utils.logging import setup_logging, create_logger
 
-ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
-load_dotenv(ENV_PATH)
+from app.services.socketio_service import sio
+from app.services.database_service import init_database, seed_database
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    setup_logging(log_level="DEBUG", json_logs=False, development=True)
-
+    setup_logging(log_level="DEBUG", json_logs=False)
     # Create logger
     logger = create_logger("main")
     logger.info("Application starting", version="1.0.0")
+
+    # Initialize database
+    init_database()
+    seed_database()
+
     yield
 
 
-app = FastAPI(lifespan=lifespan, title=settings.app_name, debug=settings.debug, version=settings.app_version)
+app = FastAPI(
+    lifespan=lifespan,
+    title=settings.app_name,
+    debug=settings.debug,
+    version=settings.app_version,
+)
 
 # CORS middleware
 app.add_middleware(

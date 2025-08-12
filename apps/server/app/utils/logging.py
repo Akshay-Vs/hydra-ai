@@ -1,9 +1,13 @@
 import logging
 import sys
-from typing import Any, Dict
+import os
+from typing import Any
 
 import structlog
 from structlog.typing import EventDict
+
+NODE_ENV = os.getenv("NODE_ENV", "development").lower()
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
 
 def add_app_context(logger: Any, method_name: str, event_dict: EventDict) -> EventDict:
@@ -12,15 +16,17 @@ def add_app_context(logger: Any, method_name: str, event_dict: EventDict) -> Eve
     return event_dict
 
 
-def add_correlation_id(logger: Any, method_name: str, event_dict: EventDict) -> EventDict:
+def add_correlation_id(
+    logger: Any, method_name: str, event_dict: EventDict
+) -> EventDict:
     """Add correlation ID from context if available."""
     return event_dict
 
 
 def setup_logging(
-    log_level: str = "INFO",
+    log_level: str = LOG_LEVEL,
     json_logs: bool = True,
-    development: bool = False
+    development: bool = NODE_ENV == "development",
 ) -> None:
     """
     Setup structured logging for FastAPI SocketIO application.
@@ -35,7 +41,7 @@ def setup_logging(
     logging.basicConfig(
         format="%(message)s",
         stream=sys.stdout,
-        level=getattr(logging, log_level.upper())
+        level=getattr(logging, log_level.upper()),
     )
 
     # Common processors for all configurations
@@ -44,22 +50,22 @@ def setup_logging(
         structlog.stdlib.add_log_level,
         structlog.stdlib.add_logger_name,
         structlog.processors.TimeStamper(fmt="iso"),
-
         # Add custom context
         add_app_context,
         add_correlation_id,
-
         # Add caller information in development
         structlog.processors.CallsiteParameterAdder(
-            parameters=[structlog.processors.CallsiteParameter.FILENAME,
-                       structlog.processors.CallsiteParameter.FUNC_NAME,
-                       structlog.processors.CallsiteParameter.LINENO]
-        ) if development else lambda *args: args[2],  # No-op if not development
-
+            parameters=[
+                structlog.processors.CallsiteParameter.FILENAME,
+                structlog.processors.CallsiteParameter.FUNC_NAME,
+                structlog.processors.CallsiteParameter.LINENO,
+            ]
+        )
+        if development
+        else lambda *args: args[2],  # No-op if not development
         # Exception handling
         structlog.processors.format_exc_info,
         structlog.processors.UnicodeDecoder(),
-
         # Stack info
         structlog.processors.StackInfoRenderer(),
     ]
@@ -69,10 +75,13 @@ def setup_logging(
         processors.append(structlog.processors.JSONRenderer())
     else:
         # Pretty printing for development
-        processors.extend([
-            structlog.dev.ConsoleRenderer(colors=True) if development
-            else structlog.processors.JSONRenderer()
-        ])
+        processors.extend(
+            [
+                structlog.dev.ConsoleRenderer(colors=True)
+                if development
+                else structlog.processors.JSONRenderer()
+            ]
+        )
 
     # Configure structlog
     structlog.configure(
@@ -90,7 +99,7 @@ def setup_logging(
         "uvicorn.error",
         "fastapi",
         "socketio",
-        "engineio"
+        "engineio",
     ]
 
     for logger_name in loggers:
@@ -101,7 +110,9 @@ def setup_logging(
     # Set specific log levels for different components
     logging.getLogger("uvicorn.access").setLevel(logging.INFO)
     logging.getLogger("socketio").setLevel(logging.INFO)
-    logging.getLogger("engineio").setLevel(logging.WARNING)  # More verbose, usually set to WARNING
+    logging.getLogger("engineio").setLevel(
+        logging.WARNING
+    )  # More verbose, usually set to WARNING
 
 
 def create_logger(name: str) -> structlog.stdlib.BoundLogger:
@@ -117,9 +128,11 @@ def setup_request_logging_middleware():
     import uuid
     from contextvars import ContextVar
 
-    request_id_var: ContextVar[str] = ContextVar('request_id')
+    request_id_var: ContextVar[str] = ContextVar("request_id")
 
-    def add_request_id_to_logs(logger: Any, method_name: str, event_dict: EventDict) -> EventDict:
+    def add_request_id_to_logs(
+        logger: Any, method_name: str, event_dict: EventDict
+    ) -> EventDict:
         try:
             request_id = request_id_var.get()
             event_dict["request_id"] = request_id
@@ -132,11 +145,7 @@ def setup_request_logging_middleware():
 
 if __name__ == "__main__":
     # Development setup
-    setup_logging(
-        log_level="DEBUG",
-        json_logs=False,
-        development=True
-    )
+    setup_logging(log_level="DEBUG", json_logs=False, development=True)
 
     # Create logger
     logger = create_logger("main")
@@ -148,5 +157,5 @@ if __name__ == "__main__":
         user_id="12345",
         action="login",
         ip_address="192.168.1.1",
-        extra_data={"browser": "Chrome", "os": "Windows"}
+        extra_data={"browser": "Chrome", "os": "Windows"},
     )

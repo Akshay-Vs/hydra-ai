@@ -1,7 +1,17 @@
+# app/models/role.py
+from __future__ import annotations
+from typing import TYPE_CHECKING  # Enables forward references
 from sqlmodel import SQLModel, Field, Relationship
 from cuid import cuid
 
-from app.models.organization import Organization, OrganizationMember
+
+if TYPE_CHECKING:
+    from app.models.organization import (
+        Organization,
+        OrganizationInvite,
+        OrganizationMember,
+    )
+    from app.models.organization import OrganizationAgent
 
 
 class Role(SQLModel, table=True):
@@ -13,25 +23,30 @@ class Role(SQLModel, table=True):
     is_system: bool = Field(default=False, nullable=False)
     level: int = Field(default=0, nullable=False)
 
-    organization: Organization = Relationship(
-        back_populates="roles", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    # Relationships
+    organization: Organization = Relationship(back_populates="roles")
+    members: list[OrganizationMember] = Relationship(back_populates="role")
+    agent_assignments: list[OrganizationAgent] = Relationship(back_populates="role")
+
+    permissions: list[RolePermission] = Relationship(
+        back_populates="role",
+        sa_relationship_kwargs={
+            "cascade": "all, delete-orphan"
+        },  # Role owns permissions
     )
-    members: list[OrganizationMember] = Relationship(
-        back_populates="role", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
-    )
+    invites: list[OrganizationInvite] = Relationship(back_populates="role")
 
 
 class RolePermission(SQLModel, table=True):
     id: str = Field(default_factory=cuid, primary_key=True)
-    role_id: str = Field(foreign_key="organizationroles.id", nullable=False)
+    role_id: str = Field(
+        foreign_key="role.id", nullable=False
+    )  # Fixed foreign key reference
     name: str = Field(index=True, nullable=False)
     description: str = Field(default=None, nullable=True)
     resource: str = Field(index=True, nullable=False)
     action: str = Field(index=True, nullable=False)
-    role: Role = Relationship(back_populates="permissions")
     created_at: str = Field(default=None, nullable=False)
 
-    role: Role = Relationship(
-        back_populates="permissions",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
-    )
+    # Relationship
+    role: Role = Relationship(back_populates="permissions")

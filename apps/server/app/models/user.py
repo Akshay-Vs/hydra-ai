@@ -17,8 +17,12 @@ class User(SQLModel, table=True):
     is_active: bool = Field(default=True, nullable=False)
     created_at: str = Field(default=None, nullable=False)
     updated_at: str = Field(default=None, nullable=False)
+    deleted_at: Optional[str] = Field(default=None, nullable=True)
 
-    preferences: "UserPreference" = Relationship(back_populates="user")
+    preferences: "UserPreference" = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"uselist": False, "cascade": "all, delete-orphan"},
+    )
 
 
 class UserPreference(SQLModel, table=True):

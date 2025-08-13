@@ -13,6 +13,14 @@ class MembershipStatus(enum.Enum):
     LEFT = "LEFT"
 
 
+class AgentStatus(enum.Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    SUSPENDED = "SUSPENDED"
+    MAINTENANCE = "MAINTENANCE"
+    TERMINATED = "TERMINATED"
+
+
 class InvitationStatus(enum.Enum):
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"

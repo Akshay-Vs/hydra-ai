@@ -21,6 +21,9 @@ dependencies = [
     "uvicorn[standard]>=0.35.0",
     "websockets>=15.0.1",
     "cuid>=0.4",
+    "sqlalchemy-schemadisplay>=2.0",
+    "pydot>=4.0.1",
+    "graphviz>=0.21",
 ]
 
 [project.optional-dependencies]

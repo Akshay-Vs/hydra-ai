@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from app.config.settings import settings
 from app.utils.logging import create_logger
 from sqlmodel import SQLModel, create_engine, Session, Field, select
+from sqlalchemy_schemadisplay import create_schema_graph
 
 logger = create_logger(__name__)
 
@@ -23,6 +24,8 @@ def init_database():
     # Create all tables in the database
     SQLModel.metadata.create_all(engine)
 
+    render_db()
+
 
 class Seed(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
@@ -42,6 +45,24 @@ def seed_database():
             session.commit()
         else:
             logger.info("Database already seeded with initial data.")
+
+
+def render_db():
+    if not settings.debug:
+        logger.warning("Skipping database schema rendering in non-debug mode.")
+        return
+
+    logger.info("Rendering database schema...")
+    graph = create_schema_graph(
+        engine=engine,
+        metadata=SQLModel.metadata,
+        show_datatypes=True,
+        show_indexes=True,
+        rankdir="LR",
+    )
+
+    graph.write("database_schema.dot")
+    logger.info("Database schema rendered to 'database_schema.png'.")
 
 
 @contextmanager

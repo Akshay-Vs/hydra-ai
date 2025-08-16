@@ -27,3 +27,9 @@ class InvitationStatus(enum.Enum):
     DECLINED = "DECLINED"
     EXPIRED = "EXPIRED"
     CANCELLED = "CANCELLED"
+
+
+class Permissions(enum.Enum):
+    READ = "READ"
+    WRITE = "WRITE"
+    DELETE = "DELETE"

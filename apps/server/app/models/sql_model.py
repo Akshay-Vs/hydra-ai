@@ -1,9 +1,10 @@
+from sqlalchemy import Nullable
 from sqlmodel import SQLModel, Field, Relationship
 from typing import List, Optional
 from enum import Enum as PyEnum
 from cuid import cuid
 
-from app.models.enums import AgentStatus
+from app.models.enums import AgentStatus, Permissions
 
 
 # Enums for status fields
@@ -165,10 +166,7 @@ class Role(SQLModel, table=True):
 class RolePermission(SQLModel, table=True):
     id: str = Field(default_factory=cuid, primary_key=True)
     role_id: str = Field(foreign_key="role.id")
-    name: str = Field(index=True)
-    description: Optional[str] = None
-    resource: str = Field(index=True)
-    action: str = Field(index=True)
+    action: Permissions = Field(index=True, nullable=False)
     created_at: str
 
     # Relationships

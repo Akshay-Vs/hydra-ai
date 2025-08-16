@@ -1,4 +1,4 @@
-from app.core.auth.user_session import UserSession
+from app.core.types.user_type import UserSession
 
 
 class PermissionChecker:

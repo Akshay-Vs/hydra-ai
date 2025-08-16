@@ -1,7 +1,7 @@
 from app.config.settings import settings
-from app.core.auth.clerk_auth import ClerkSocketIOAuth
-from app.core.auth.decorators import create_auth_decorators
+from app.core.auth.clerk_auth import ClerkAuth
 from app.core.auth.session_manager import SessionManager
+from app.core.decorators.socket_auth import create_ws_auth_decorators
 from app.utils.logging import create_logger
 from socketio.exceptions import ConnectionRefusedError
 
@@ -18,10 +18,10 @@ sio = socketio.AsyncServer(
 session_manager = SessionManager()
 
 # Create decorators with injected dependencies
-auth_decorators = create_auth_decorators(session_manager, sio)
-require_permission = auth_decorators['require_permission']
-require_role = auth_decorators['require_role']
-authenticated_only = auth_decorators['authenticated_only']
+auth_decorators = create_ws_auth_decorators(session_manager, sio)
+require_permission = auth_decorators["require_permission"]
+require_role = auth_decorators["require_role"]
+authenticated_only = auth_decorators["authenticated_only"]
 
 
 logger.info("Socket.IO application mounted", version="1.0.0")
@@ -46,8 +46,8 @@ async def connect(sid, environ, auth):
                 "Clerk secret key is not configured",
                 {"error_code": "CONFIG_ERROR", "status_code": 500},
             )
-        authenticator = ClerkSocketIOAuth(settings.clerk_secret_key)
-        user = await authenticator.authenticate(environ, auth["token"])
+        authenticator = ClerkAuth(settings.clerk_secret_key)
+        user = await authenticator.authenticate_ASGI(environ, auth["token"])
 
         logger.debug(f"Validated user: {user}, \n type: {type(user)}")
 
@@ -55,7 +55,6 @@ async def connect(sid, environ, auth):
             raise ConnectionRefusedError(
                 "Invalid token", {"error_code": "TOKEN_INVALID", "status_code": 401}
             )
-
 
         # Create session data
         user_session = await session_manager.create_session(sid, user)
@@ -87,5 +86,5 @@ async def message(sid, session, data):
     logger.info(f"Received message from {sid}: {data}")
     # Echo the message back to the client
     logger.debug(f"Echoing data: {data}")
-    await sio.emit("message", {"echo": data}, room=sid)
+    await sio.emit("message", {"echo": data, "session": f"${session}"}, room=sid)
     return "Message received"

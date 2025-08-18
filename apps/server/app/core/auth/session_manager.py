@@ -1,5 +1,5 @@
 from clerk_backend_api import User
-from app.core.auth.user_session import UserSession
+from app.core.types.user_type import UserSession
 from app.utils.logging import create_logger
 from typing import Dict, Set, Any
 from fastapi import HTTPException
@@ -35,8 +35,11 @@ class SessionManager:
                 username=user.username,
                 email=user.email_addresses,
                 org_id="NOT_IMPLEMENTED",  #! Placeholder, org_id should be set properly
-                roles= ["user"],  #! Placeholder, roles should be set properly
-                permissions= {'read', 'chat'},  #! Placeholder, permissions should be set properly
+                roles=["user"],  #! Placeholder, roles should be set properly
+                permissions={
+                    "read",
+                    "chat",
+                },  #! Placeholder, permissions should be set properly
                 connected_at=datetime.now(),
                 last_activity=datetime.now(),
             )

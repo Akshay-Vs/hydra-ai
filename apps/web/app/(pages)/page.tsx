@@ -1,29 +1,29 @@
-import InfoBlock from '@/components/sections/info-block';
-import LiveTail from '@/components/sections/live-tail';
-import { RequestProcessed } from '@/components/sections/request-processed';
-import UsageMetrics from '@/components/sections/usage-metrics';
-import Block from '@/components/wrappers/block';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import type { Organization } from '@clerk/nextjs/server';
+import SplashScreen from '@/components/tokens/splash-screen';
+import { useFetch } from '@/hooks/use-fetch';
 
 export default function Home() {
-  return (
-    <div className="col-center gap-4  pt-4">
-      <div className="w-full center gap-4 h-[45vh]">
-        <Block className="w-[80%] h-full bg-transparent border-none pt-0">
-          <UsageMetrics />
-        </Block>
-        <Block className="w-[20%] bg-transparent border-none h-full p-0">
-          <InfoBlock />
-        </Block>
-      </div>
+  const { data, isLoading } = useFetch<Organization[]>(['orgs'], '/org', 'POST');
+  const router = useRouter();
 
-      <div className="w-full center gap-4 h-[45vh]">
-        <Block className="pt-0 overflow-auto">
-          <LiveTail />
-        </Block>
-        <Block>
-          <RequestProcessed />
-        </Block>
-      </div>
-    </div>
-  );
+  useEffect(() => {
+    if (data && !isLoading) {
+      if (data.length > 0) {
+        // Redirect to the first organization's page
+        router.push(`/org/${data[0].id}`);
+      } else {
+        router.push('/org/new');
+      }
+    }
+  }, [data, router, isLoading]);
+
+  if (!isLoading) {
+    return null;
+  }
+
+  return <SplashScreen />;
 }

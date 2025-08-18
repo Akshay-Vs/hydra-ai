@@ -8,7 +8,20 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        hostname: '*.utfs.io',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        hostname: '*.ufs.sh',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default withSerwist(nextConfig);

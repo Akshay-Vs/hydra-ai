@@ -9,7 +9,7 @@ from app.utils.logging import setup_logging, create_logger
 from app.services.socketio_service import sio
 from app.services.database_service import init_database  # , seed_database
 
-from app.api.routes import health, user_route, onboarding
+from app.api.routes import health, organization, user_route, onboarding
 
 import socketio
 
@@ -47,6 +47,7 @@ app.add_middleware(
 app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(user_route.router, prefix="/user", tags=["users"])
 app.include_router(onboarding.router, prefix="/onboarding", tags=["onboarding"])
+app.include_router(organization.router, prefix="/org", tags=["organizations"])
 # app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
 
 

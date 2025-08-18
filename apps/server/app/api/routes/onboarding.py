@@ -21,7 +21,8 @@ logger = create_logger(__name__)
 
 
 @router.post("/")
-async def create_user(request: Request):
+async def initialize_user(request: Request):
+    logger.info("Initializing user...")
     try:
         if not settings.clerk_secret_key:
             raise ValueError(
@@ -31,6 +32,15 @@ async def create_user(request: Request):
 
         authenticator = ClerkAuth(settings.clerk_secret_key)
         clerk_user = await authenticator.authenticate_HTTP(request)
+
+        if not clerk_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unauthorized: Clerk user not found",
+            )
+
+        logger.info(f"Authenticated Clerk user: {clerk_user.id}")
+
         with get_session() as session:
             now = datetime.now(timezone.utc).isoformat()
 

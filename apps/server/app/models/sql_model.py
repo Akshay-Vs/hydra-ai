@@ -91,7 +91,7 @@ class OrganizationMember(SQLModel, table=True):
     role_id: str = Field(foreign_key="role.id")
 
     joined_at: str
-    left_at: Optional[str] = None
+    left_at: Optional[str] = Field(default=None)
     granted_by: Optional[str] = Field(default=None, foreign_key="user.id")
     role_expires_at: Optional[str] = None
 

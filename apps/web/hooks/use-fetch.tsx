@@ -11,9 +11,12 @@ const api = axios.create({
 });
 console.log('API Base URL:', process.env.NEXT_PUBLIC_BACKEND_BASE_URL);
 
+type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
 export const useFetch = <TData = unknown,>(
   key: string | unknown[],
   url: string,
+  Method: Method = 'GET',
   config?: AxiosRequestConfig,
   options?: Omit<UseQueryOptions<TData>, 'queryKey' | 'queryFn'>
 ) => {
@@ -30,7 +33,7 @@ export const useFetch = <TData = unknown,>(
       if (!token) throw new Error('No token available');
       const res = await api.request<TData>({
         url,
-        method: 'GET',
+        method: Method,
         headers: { Authorization: `Bearer ${token}` },
         ...config,
       });

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@hydra/ui/button';
 import { cn } from '@hydra/ui/libs/utils';
-import { Bell, HomeIcon, Link as Link2, Settings, User2, Waypoints } from 'lucide-react';
+import { Bell, HomeIcon, Link as Link2, Settings, User2 } from 'lucide-react';
 
 import Logo from '@/public/images/Hydra_Logo.svg';
 import IconButton from '../tokens/icon-button';

@@ -4,11 +4,11 @@ import { RequestProcessed } from '@/components/sections/request-processed';
 import UsageMetrics from '@/components/sections/usage-metrics';
 import Block from '@/components/wrappers/block';
 
-type Params = {
-  params: Promise<{ orgid: string }>;
-};
+// type Params = {
+//   params: Promise<{ orgid: string }>;
+// };
 
-const page = async ({ params }: Params) => {
+const page = async () => {
   return (
     <div className="col-center gap-4  pt-4">
       <div className="w-full center gap-4 h-[45vh]">

@@ -6,7 +6,7 @@ const Block = ({
   className,
   children,
   onClick,
-}: BaseProps & { onClick: (e: MouseEvent<HTMLDivElement>) => void }) => {
+}: BaseProps & { onClick?: (e: MouseEvent<HTMLDivElement>) => void }) => {
   return (
     <section
       onClick={onClick}

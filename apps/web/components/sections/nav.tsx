@@ -35,7 +35,7 @@ const Nav = () => {
     },
   ];
   return (
-    <nav className="w-full h-14 flex items-center justify-between">
+    <nav className="w-full h-14 flex items-center justify-between select-none">
       <div className="flex center gap-8 h-14">
         <Image
           src={Logo}

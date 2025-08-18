@@ -8,7 +8,7 @@ type Params = {
   params: Promise<{ orgid: string }>;
 };
 
-const page = async ({ _params }: Params) => {
+const page = async ({ params }: Params) => {
   return (
     <div className="col-center gap-4  pt-4">
       <div className="w-full center gap-4 h-[45vh]">

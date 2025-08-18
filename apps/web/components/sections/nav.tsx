@@ -1,6 +1,9 @@
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Button } from '@hydra/ui/button';
+import { cn } from '@hydra/ui/libs/utils';
 import { Bell, HomeIcon, Link as Link2, Settings, User2, Waypoints } from 'lucide-react';
 
 import Logo from '@/public/images/Hydra_Logo.svg';
@@ -8,6 +11,7 @@ import IconButton from '../tokens/icon-button';
 import OrgSelectorDropDown from '../tokens/org-selector-dropdown';
 
 const Nav = () => {
+  const pathname = usePathname();
   const navButtons = [
     {
       id: 'Home',
@@ -15,12 +19,12 @@ const Nav = () => {
       href: '/',
       isActive: true,
     },
-    {
-      id: 'Nodes',
-      icon: <Waypoints className="h-6 w-6" />,
-      href: '/nodes',
-      isActive: false,
-    },
+    // {
+    //   id: 'Nodes',
+    //   icon: <Waypoints className="h-6 w-6" />,
+    //   href: '/nodes',
+    //   isActive: false,
+    // },
     {
       id: 'Integrations',
       icon: <Link2 className="h-6 w-6" />,
@@ -35,7 +39,12 @@ const Nav = () => {
     },
   ];
   return (
-    <nav className="w-full h-14 flex items-center justify-between select-none">
+    <nav
+      className={cn(
+        pathname === '/' && 'opacity-0',
+        'w-full h-14 flex items-center justify-between select-none'
+      )}
+    >
       <div className="flex center gap-8 h-14">
         <Image
           src={Logo}
@@ -54,7 +63,6 @@ const Nav = () => {
             </Link>
           ))}
         </div>
-
         <OrgSelectorDropDown />
       </div>
 

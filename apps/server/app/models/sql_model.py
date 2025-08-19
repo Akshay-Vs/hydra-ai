@@ -57,7 +57,7 @@ class UserPreference(SQLModel, table=True):
 
 class Organization(SQLModel, table=True):
     id: str = Field(default_factory=cuid, primary_key=True)
-    name: str = Field(index=True, unique=True)
+    name: str = Field(index=True, unique=False)
     description: Optional[str] = None
     avatar_url: Optional[str] = None
     website: Optional[str] = None

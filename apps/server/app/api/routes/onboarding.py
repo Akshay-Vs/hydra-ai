@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Request, status
 
 from app.config.settings import settings
@@ -14,6 +13,7 @@ from app.models.sql_model import (
 )
 from app.services.database_service import get_session
 from app.utils.logging import create_logger
+from app.utils.now import now
 
 
 router = APIRouter()
@@ -42,10 +42,10 @@ async def initialize_user(request: Request):
         logger.info(f"Authenticated Clerk user: {clerk_user.id}")
 
         with get_session() as session:
-            now = datetime.now(timezone.utc).isoformat()
+            _now = now()
 
             # Create new user with clerk user id
-            user = User(clerk_id=clerk_user.id, created_at=now, updated_at=now)
+            user = User(clerk_id=clerk_user.id, created_at=_now, updated_at=_now)
             session.add(user)
 
             # Initialize user preference
@@ -56,8 +56,8 @@ async def initialize_user(request: Request):
             organization = Organization(
                 name="onboarding",
                 description="onbooarding organization",
-                created_at=now,
-                updated_at=now,
+                created_at=_now,
+                updated_at=_now,
             )
             session.add(organization)
 
@@ -74,7 +74,7 @@ async def initialize_user(request: Request):
 
             # Permission
             permission = RolePermission(
-                role_id=role.id, action=Permissions.WRITE, created_at=now
+                role_id=role.id, action=Permissions.WRITE, created_at=_now
             )
             session.add(permission)
 
@@ -83,7 +83,7 @@ async def initialize_user(request: Request):
                 organization_id=organization.id,
                 user_id=user.id,
                 role_id=role.id,
-                joined_at=now,
+                joined_at=_now,
             )
             session.add(org_member)
 

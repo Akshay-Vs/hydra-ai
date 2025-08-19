@@ -24,7 +24,7 @@
     "eslint-plugin-prettier": "^5.5.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-unused-imports": "^4.1.4"
+    "eslint-plugin-unused-imports": "^4.2.0"
   },
   "devDependencies": {
     "eslint-config-expo": "^9.2.0",
@@ -36,7 +36,7 @@
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-unused-imports": "^4.1.4"
+    "eslint-plugin-unused-imports": "^4.2.0"
   },
   "dependencies": {
     "@cspell/eslint-plugin": "^9.2.0",

@@ -1,7 +1,7 @@
 from app.config.settings import settings
 from app.core.auth.clerk_auth import ClerkAuth
 from app.core.auth.session_manager import SessionManager
-from app.core.decorators.socket_auth import create_ws_auth_decorators
+from app.core.helpers.socket_auth import create_ws_auth_decorators
 from app.utils.logging import create_logger
 from socketio.exceptions import ConnectionRefusedError
 

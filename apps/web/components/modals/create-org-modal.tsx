@@ -1,11 +1,14 @@
 'use client';
-import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@hydra/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@hydra/ui/form';
 import { Input } from '@hydra/ui/input';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useMutate } from '@/hooks/use-mutate';
+import { useModalStore } from '@/store/modal-store';
+import type { Organization } from '@/types/org';
 import LoadingSpinner from '../tokens/loading-spinner';
 
 const formSchema = z.object({
@@ -14,7 +17,20 @@ const formSchema = z.object({
 });
 
 const CreateOrgModal = () => {
-  const [isLoading, startLoading] = useTransition();
+  const router = useRouter();
+  const { closeModal } = useModalStore();
+
+  const { mutateAsync, isPending } = useMutate<Organization>({
+    onSuccess: org => {
+      router.push(`/org/${org.id}`);
+      closeModal();
+      setTimeout(() => router.push(`/org/${org.id}`), 80);
+    },
+    onError: error => {
+      // Handle error, e.g., show an error message
+      console.error('Error creating organization:', error);
+    },
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -23,13 +39,11 @@ const CreateOrgModal = () => {
       description: '',
     },
   });
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    startLoading(async () => {
-      // Simulate a network request
-      setTimeout(() => {
-        console.log('Organization created:', data);
-        form.reset();
-      }, 1000);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    await mutateAsync({
+      url: '/org',
+      method: 'POST',
+      data,
     });
   };
 
@@ -76,9 +90,9 @@ const CreateOrgModal = () => {
             variant="secondary"
             size="lg"
             className="rounded-xl py-6 w-48"
-            disabled={isLoading}
+            disabled={isPending}
           >
-            {isLoading ? <LoadingSpinner /> : 'Create Organization'}
+            {isPending ? <LoadingSpinner /> : 'Create Organization'}
           </Button>
         </div>
       </form>

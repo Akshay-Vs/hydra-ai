@@ -27,6 +27,7 @@
     "react-hook-form": "^7.62.0",
     "react-icons": "^5.5.0",
     "sass": "^1.89.2",
+    "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "worker": "link:@serwist/next/worker",
     "zod": "^4.0.17",

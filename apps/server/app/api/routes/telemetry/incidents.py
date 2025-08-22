@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from typing import List
-from app.core.types.telemetry_type import Incident
+from hydra_types.telemetry import Incident
 from app.utils.logging import create_logger
 
 router = APIRouter()

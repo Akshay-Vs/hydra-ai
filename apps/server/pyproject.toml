@@ -24,6 +24,7 @@ dependencies = [
     "sqlalchemy-schemadisplay>=2.0",
     "pydot>=4.0.1",
     "graphviz>=0.21",
+    "hydra-types",
 ]
 
 [project.optional-dependencies]
@@ -76,3 +77,6 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.uv.sources]
+hydra-types = { path = "../../packages/python/libs/types", editable = true }

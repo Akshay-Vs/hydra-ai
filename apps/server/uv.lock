@@ -448,6 +448,17 @@ wheels = [
 ]
 
 [[package]]
+name = "hydra-types"
+version = "0.1.0"
+source = { editable = "../../packages/python/libs/types" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.11.7" }]
+
+[[package]]
 name = "identify"
 version = "2.6.12"
 source = { registry = "https://pypi.org/simple" }
@@ -970,6 +981,7 @@ dependencies = [
     { name = "dotenv" },
     { name = "fastapi" },
     { name = "graphviz" },
+    { name = "hydra-types" },
     { name = "prometheus-client" },
     { name = "psutil" },
     { name = "pydantic", extra = ["email"] },
@@ -1011,6 +1023,7 @@ requires-dist = [
     { name = "graphviz", specifier = ">=0.21" },
     { name = "gunicorn", marker = "extra == 'prod'", specifier = ">=21.2.0" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.28.1" },
+    { name = "hydra-types", editable = "../../packages/python/libs/types" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.17.1" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.2.0" },
     { name = "prometheus-client", specifier = ">=0.22.1" },

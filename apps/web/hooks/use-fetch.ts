@@ -4,19 +4,11 @@ import { useAuth } from '@clerk/nextjs';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_BASE_URL,
-});
-console.log('API Base URL:', process.env.NEXT_PUBLIC_BACKEND_BASE_URL);
-
-type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+import { api } from '@/libs/api';
 
 export const useFetch = <TData = unknown,>(
   key: string | unknown[],
   url: string,
-  Method: Method = 'GET',
   config?: AxiosRequestConfig,
   options?: Omit<UseQueryOptions<TData>, 'queryKey' | 'queryFn'>
 ) => {
@@ -33,7 +25,7 @@ export const useFetch = <TData = unknown,>(
       if (!token) throw new Error('No token available');
       const res = await api.request<TData>({
         url,
-        method: Method,
+        method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
         ...config,
       });

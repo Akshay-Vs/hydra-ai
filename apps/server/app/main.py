@@ -1,8 +1,12 @@
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
+
 from contextlib import asynccontextmanager
 
+from app.api.routes.telemetry import batch, events, incidents, logs, metrics
 from app.config.settings import settings
 from app.utils.logging import setup_logging, create_logger
 
@@ -14,11 +18,13 @@ from app.api.routes import health, organization, user_route, onboarding
 import socketio
 
 
+logger = create_logger("main")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging(log_level="DEBUG", json_logs=False)
     # Create logger
-    logger = create_logger("main")
     logger.info("Application starting", version="1.0.0")
 
     # Initialize database
@@ -48,12 +54,18 @@ app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(user_route.router, prefix="/user", tags=["users"])
 app.include_router(onboarding.router, prefix="/onboarding", tags=["onboarding"])
 app.include_router(organization.router, prefix="/org", tags=["organizations"])
+
+# /telemetry routes
+app.include_router(batch.router, prefix="/telemetry/batch", tags=["telemetry"])
+app.include_router(events.router, prefix="/telemetry/events", tags=["telemetry"])
+app.include_router(incidents.router, prefix="/telemetry/incidents", tags=["telemetry"])
+app.include_router(logs.router, prefix="/telemetry/logs", tags=["telemetry"])
+app.include_router(metrics.router, prefix="/telemetry/metrics", tags=["telemetry"])
 # app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
 
 
 @app.exception_handler(HTTPException)
 async def global_exception_handler(request: Request, exc: HTTPException):
-    logger = create_logger("main")
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
@@ -64,9 +76,18 @@ async def global_exception_handler(request: Request, exc: HTTPException):
     )
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.error(f"Validation error: {exc}", exc_info=True)
+    logger.debug(f"Request body: {await request.body()}")
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
+    )
+
+
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
-    logger = create_logger("main")
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,

@@ -26,7 +26,9 @@ const OrgSelectorDropDown = () => {
       setOrgs(data);
 
       if (params.orgid) {
-        setSelectedOrg(data.find(org => org.id === params.orgid)?.name ?? (data[0]?.name || ''));
+        const org = data.find(org => org.id === params.orgid)?.name;
+        if (!org?.length) return router.push('/404');
+        setSelectedOrg(org);
       }
     }
   }, [data, setOrgs, params, setSelectedOrg]);

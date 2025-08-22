@@ -2,12 +2,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Button } from '@hydra/ui/button';
 import { cn } from '@hydra/ui/libs/utils';
 import { Bell, HomeIcon, Link as Link2, Settings, User2 } from 'lucide-react';
 
 import Logo from '@/public/images/Hydra_Logo.svg';
 import IconButton from '../tokens/icon-button';
+import InviteMemberButton from '../tokens/invite-member-button';
 import OrgSelectorDropDown from '../tokens/org-selector-dropdown';
 
 const Nav = () => {
@@ -70,10 +70,7 @@ const Nav = () => {
         <div className="h-3 w-3 bg-green-300 rounded-full" />
 
         <div className="bg-surface-2-dark h-full w-fit center gap-3 border-2 border-border-dark rounded-default p-1">
-          <Button variant="secondary" className="h-full" size="default">
-            Invite Members
-          </Button>
-
+          <InviteMemberButton />
           <div>
             <IconButton isActive={false}>
               <Settings className="h-6 w-6" />

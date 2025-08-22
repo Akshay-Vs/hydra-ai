@@ -2,11 +2,10 @@ import time
 import uuid
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from utils import _now
 
-from telemetry_client import HydraTelemetryClient
+from .utils import _now
+from .telemetry_client import HydraTelemetryClient
 from hydra_types.telemetry import Metric, Trace
-
 
 
 class HydraMiddleware(BaseHTTPMiddleware):
@@ -25,8 +24,10 @@ class HydraMiddleware(BaseHTTPMiddleware):
         span_id = str(uuid.uuid4())
 
         # Set trace context
-        self.hydra_client._current_trace_id = trace_id
-        self.hydra_client._current_span_id = span_id
+        self.hydra_client.set_trace_context(trace_id, span_id)
+        self.trace_id = self.hydra_client.current_trace_id
+        self.span_id = self.hydra_client.current_span_id
+        self.hydra_client.clear_trace_context()
 
         try:
             response = await call_next(request)
@@ -50,6 +51,9 @@ class HydraMiddleware(BaseHTTPMiddleware):
 
         if error:
             attributes["error"] = error
+
+        if trace_id is None or self.span_id is None:
+            raise ValueError("Both trace_id and span_id must be set before proceeding.")
 
         trace = Trace(
             trace_id=trace_id,
@@ -99,7 +103,7 @@ class HydraMiddleware(BaseHTTPMiddleware):
         )
 
         # Clear trace context
-        self.hydra_client._current_trace_id = None
-        self.hydra_client._current_span_id = None
+        trace_id = self.hydra_client.current_trace_id
+        span_id = self.hydra_client.current_span_id
 
         return response

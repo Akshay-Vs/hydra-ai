@@ -1,7 +1,10 @@
 from contextlib import contextmanager
+from typing import List, Type
+
 from app.config.settings import settings
+from app.models.sql_model import AgentMemory, Incident, Log, Metric
 from app.utils.logging import create_logger
-from sqlmodel import SQLModel, create_engine, Session, Field, select
+from sqlmodel import SQLModel, create_engine, Session, Field, select, text
 from sqlalchemy_schemadisplay import create_schema_graph
 
 logger = create_logger(__name__)
@@ -24,7 +27,23 @@ def init_database():
     # Create all tables in the database
     SQLModel.metadata.create_all(engine)
 
+    # Enable HTAP for specified tables
+    enable_HTAP(htap_tables=[Incident, Log, Metric, AgentMemory])
+
+    # Render the database schema to a dot file
     render_db()
+
+
+def enable_HTAP(htap_tables: List[Type[SQLModel]]):
+    with engine.connect() as conn:
+        for table in htap_tables:
+            tablename = table.__tablename__
+            try:
+                conn.execute(text(f"ALTER TABLE {tablename} SET TIFLASH REPLICA 1"))
+                logger.info(f"Enabled TiFlash replica for `{tablename}` table.")
+            except Exception as e:
+                logger.warning(f"Could not enable TiFlash for {tablename}: {e}")
+        conn.commit()
 
 
 class Seed(SQLModel, table=True):
@@ -62,7 +81,7 @@ def render_db():
     )
 
     graph.write("database_schema.dot")
-    logger.info("Database schema rendered to 'database_schema.png'.")
+    logger.info("Database schema rendered to 'database_schema.dot'.")
 
 
 @contextmanager

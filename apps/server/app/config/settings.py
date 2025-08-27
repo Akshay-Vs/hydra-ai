@@ -21,7 +21,12 @@ class Settings(BaseSettings):
     # Security
     secret_key: Optional[str] = None
     clerk_secret_key: Optional[str] = None
+    access_token_expire_minutes: int = 30
+
+    # Auth M2M
     session_expiry: int = 86400
+    m2m_auth_secret_key: str = ""
+    m2m_auth_algorithm: str = "HS256"
 
     # Database
     database_url: Optional[str] = None

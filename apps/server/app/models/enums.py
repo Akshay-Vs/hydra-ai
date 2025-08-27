@@ -1,35 +1,79 @@
-import enum
+from enum import Enum
 
 
-class UserType(enum.Enum):
-    HUMAN = "HUMAN"
-    AI_AGENT = "AI_AGENT"
+class SeverityEnum(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
 
 
-class MembershipStatus(enum.Enum):
+class StatusEnum(str, Enum):
+    OPEN = "open"
+    ANALYZING = "analyzing"
+    RESOLVED = "resolved"
+    ESCALATED = "escalated"
+
+
+class LogLevelEnum(str, Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARN = "WARN"
+    ERROR = "ERROR"
+    FATAL = "FATAL"
+
+
+class MembershipStatus(str, Enum):
     ACTIVE = "ACTIVE"
     INACTIVE = "INACTIVE"
-    SUSPENDED = "SUSPENDED"
-    LEFT = "LEFT"
-
-
-class AgentStatus(enum.Enum):
-    ACTIVE = "ACTIVE"
-    INACTIVE = "INACTIVE"
-    SUSPENDED = "SUSPENDED"
-    MAINTENANCE = "MAINTENANCE"
-    TERMINATED = "TERMINATED"
-
-
-class InvitationStatus(enum.Enum):
     PENDING = "PENDING"
-    ACCEPTED = "ACCEPTED"
-    DECLINED = "DECLINED"
-    EXPIRED = "EXPIRED"
-    CANCELLED = "CANCELLED"
 
 
-class Permissions(enum.Enum):
-    READ = "READ"
-    WRITE = "WRITE"
-    DELETE = "DELETE"
+class AgentStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    MAINTENANCE = "MAINTENANCE"
+    ERROR = "ERROR"
+
+
+class Permissions(str, Enum):
+    READ = "read"
+    WRITE = "write"
+    ADMIN = "admin"
+    INCIDENT_MANAGE = "incident_manage"
+    AGENT_MANAGE = "agent_manage"
+    ORG_ADMIN = "org_admin"
+
+
+class MemoryType(str, Enum):
+    PATTERN = "pattern"
+    SOLUTION = "solution"
+    CORRELATION = "correlation"
+    ANOMALY_SIGNATURE = "anomaly_signature"
+
+
+class ExecutionStage(str, Enum):
+    DETECTION = "detection"
+    ANALYSIS = "analysis"
+    PLANNING = "planning"
+    EXECUTION = "execution"
+    VERIFICATION = "verification"
+
+
+class InvitationStatus(str, Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    DECLINED = "declined"
+    EXPIRED = "expired"
+
+
+class ClientStatus(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    REVOKED = "revoked"
+
+
+class SessionStatus(str, Enum):
+    ACTIVE = "active"
+    EXPIRED = "expired"
+    REVOKED = "revoked"

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request, status
+from sqlmodel import null, select
 
 from app.config.settings import settings
 from app.core.auth.clerk_auth import ClerkAuth
@@ -44,24 +45,44 @@ async def initialize_user(request: Request):
         with get_session() as session:
             _now = now()
 
+            # Check if user already exists
+            existing_user = existing_user = session.exec(
+                select(User).where(User.clerk_id == clerk_user.id)
+            ).one_or_none()
+            print("Existing User: ", existing_user)
+
+            if existing_user:
+                logger.debug(f"User already exists with Clerk ID: {clerk_user.id}")
+                user_orgs = session.exec(
+                    select(Organization)
+                    .join(OrganizationMember)
+                    .where(
+                        OrganizationMember.user_id == existing_user.id,
+                        Organization.deleted_at == null(),
+                        OrganizationMember.left_at == null(),
+                    )
+                ).all()
+                return {
+                    "id": existing_user.id,
+                    "clerk_id": existing_user.clerk_id,
+                    "organization_id": user_orgs[0].id,
+                    "created_at": existing_user.created_at,
+                }
+
             # Create new user with clerk user id
             user = User(clerk_id=clerk_user.id, created_at=_now, updated_at=_now)
             session.add(user)
-
-            # Initialize user preference
-            user_preference = UserPreference(user_id=user.id)
-            session.add(user_preference)
-
+            session.flush()
             # Create Organization
             organization = Organization(
                 name="onboarding",
-                description="onbooarding organization",
+                description="onboarding organization",
                 created_at=_now,
                 updated_at=_now,
             )
             session.add(organization)
-
-            # Create Roles and Permission
+            session.flush()
+            # Create Role
             role = Role(
                 name="owner",
                 description="organization owner",
@@ -71,10 +92,17 @@ async def initialize_user(request: Request):
                 organization_id=organization.id,
             )
             session.add(role)
+            session.flush()
+
+            # Initialize user preference
+            user_preference = UserPreference(user_id=user.id)
+            session.add(user_preference)
 
             # Permission
             permission = RolePermission(
-                role_id=role.id, action=Permissions.WRITE, created_at=_now
+                role_id=role.id,
+                action=Permissions.WRITE,
+                created_at=_now,
             )
             session.add(permission)
 
@@ -93,9 +121,8 @@ async def initialize_user(request: Request):
                 "id": user.id,
                 "clerk_id": clerk_user.id,
                 "organization_id": organization.id,
-                "created_at": now,
+                "created_at": _now,
             }
-
     except HTTPException as e:
         logger.error(f"Authorization error: {e.detail}")
         raise e

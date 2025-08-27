@@ -1,7 +1,10 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useFetch } from '@/hooks/use-fetch';
+import SplashScreen from '@/components/tokens/splash-screen';
+import useIsClient from '@/hooks/use-isclient';
+import { useMutate } from '@/hooks/use-mutate';
 
 type OnboardingData = {
   id: string;
@@ -11,29 +14,32 @@ type OnboardingData = {
 };
 
 const OnboardingPage = () => {
-  // Get userid from database, if it exists, redirect to /org/new
-  // If it does not exist, initiate onboarding flow
-
-  const { data, isLoading, error } = useFetch<OnboardingData>(
-    ['onboarding'],
-    '/onboarding',
-    'POST'
-  );
   const router = useRouter();
+  const isMounted = useIsClient();
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const { mutateAsync, error, isPending } = useMutate<OnboardingData>({
+    onSuccess: data => {
+      if (data && 'organization_id' in data) {
+        router.push(`/org/${data.organization_id}`);
+      }
+    },
+  });
 
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
+  useEffect(() => {
+    mutateAsync({ url: '/onboarding', method: 'POST' });
+  }, [mutateAsync]);
 
-  if (data) {
-    const { organization_id } = data;
-    router.push(`/org/${organization_id}`);
-    return null;
-  }
+  if (!isMounted) return null;
+  if (error)
+    return (
+      <SplashScreen
+        label="An error occurred during onboarding. Please try again."
+        isLoading={false}
+      />
+    );
+  if (isPending) return <SplashScreen label="Setting up your workspace..." />;
+
+  return null;
 };
 
 export default OnboardingPage;

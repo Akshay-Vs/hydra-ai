@@ -1,4 +1,5 @@
 from datetime import datetime
+from operator import index
 from sqlmodel import JSON, Column, Index, SQLModel, Field, Relationship, String, Text
 from typing import Any, Dict, List, Optional
 from cuid import cuid
@@ -78,6 +79,9 @@ class Organization(SQLModel, table=True):
     # Relationships
     members: List["OrganizationMember"] = Relationship(back_populates="organization")
     invites: List["OrganizationInvite"] = Relationship(back_populates="organization")
+    credentials: List["OrganizationCredential"] = Relationship(
+        back_populates="organization"
+    )
     agents: List["OrganizationAgent"] = Relationship(back_populates="organization")
     roles: List["Role"] = Relationship(back_populates="organization")
     incidents: List["Incident"] = Relationship(back_populates="organization")
@@ -138,6 +142,21 @@ class OrganizationInvite(SQLModel, table=True):
         sa_relationship_kwargs={"foreign_keys": "[OrganizationInvite.sender_id]"},
     )
     role: Optional["Role"] = Relationship(back_populates="invites")
+
+
+class OrganizationCredential(TimestampMixin, table=True):
+    __tablename__ = "organization_credentials"  # type: ignore
+
+    id: str = Field(default_factory=cuid, primary_key=True)
+    organization_id: str = Field(foreign_key="organizations.id")
+    secret_hash: str = Field(nullable=False, index=True)
+    is_active: bool = Field(default=True)
+    expires_at: Optional[datetime] = Field(default=None)
+
+    # composite index
+    __table_args__ = (Index("idx_org_active", "organization_id", "is_active"),)
+
+    organization: Optional["Organization"] = Relationship(back_populates="credentials")
 
 
 class Agent(SQLModel, table=True):

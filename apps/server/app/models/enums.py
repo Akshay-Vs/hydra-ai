@@ -65,3 +65,15 @@ class InvitationStatus(str, Enum):
     ACCEPTED = "accepted"
     DECLINED = "declined"
     EXPIRED = "expired"
+
+
+class ClientStatus(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    REVOKED = "revoked"
+
+
+class SessionStatus(str, Enum):
+    ACTIVE = "active"
+    EXPIRED = "expired"
+    REVOKED = "revoked"

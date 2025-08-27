@@ -31,7 +31,7 @@ const OrgSelectorDropDown = () => {
         setSelectedOrg(org);
       }
     }
-  }, [data, setOrgs, params, setSelectedOrg]);
+  }, [data, setOrgs, params, setSelectedOrg, router]);
 
   const isSelected = (org: string) => {
     return selectedOrg === org;

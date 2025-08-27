@@ -1,5 +1,3 @@
-from functools import wraps
-from typing import Callable
 from fastapi import Request, HTTPException
 from sqlmodel import select
 import logging

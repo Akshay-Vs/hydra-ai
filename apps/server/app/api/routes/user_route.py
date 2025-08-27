@@ -8,6 +8,7 @@ from app.core.types.user_type import UserCreateRequest, UserPreferenceUpdateRequ
 from app.models.sql_model import User, UserPreference
 from app.services.database_service import get_session
 from app.utils.logging import create_logger
+from app.utils.now import now
 
 
 router = APIRouter()
@@ -18,11 +19,10 @@ logger = create_logger(__name__)
 async def create_user(payload: UserCreateRequest):
     try:
         with get_session() as session:
-            now = datetime.now(timezone.utc).isoformat()
             user = User(
                 clerk_id=payload.clerk_id,
-                created_at=now,
-                updated_at=now,
+                created_at=now(),
+                updated_at=now(),
             )
             session.add(user)
             session.flush()
@@ -83,8 +83,7 @@ async def update_user(user_id: str, payload: UserPreferenceUpdateRequest):
 
             user.avatar_url = payload.avatar_url
             user.bio = payload.bio
-            user.updated_at = datetime.now(timezone.utc).isoformat()
-
+            user.updated_at = now()
             user_preference = session.get(UserPreference, user_id)
 
             if not user_preference:

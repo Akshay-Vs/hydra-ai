@@ -40,6 +40,6 @@
   },
   "dependencies": {
     "@cspell/eslint-plugin": "^9.2.0",
-    "@typescript-eslint/eslint-plugin": "^8.38.0"
+    "@typescript-eslint/eslint-plugin": "^8.41.0"
   }
 }

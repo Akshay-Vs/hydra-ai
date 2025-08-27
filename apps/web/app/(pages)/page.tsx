@@ -7,7 +7,7 @@ import SplashScreen from '@/components/tokens/splash-screen';
 import { useFetch } from '@/hooks/use-fetch';
 
 export default function Home() {
-  const { data, isLoading } = useFetch<Organization[]>(['orgs'], '/org', 'POST');
+  const { data, isLoading } = useFetch<Organization[]>(['orgs'], '/org');
   const router = useRouter();
 
   useEffect(() => {

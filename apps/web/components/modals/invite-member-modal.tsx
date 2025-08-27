@@ -15,7 +15,7 @@ const formSchema = z.object({
 });
 
 const InviteMemberModal = () => {
-  const { mutateAsync, isPending } = useMutate();
+  const { isPending } = useMutate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -26,7 +26,9 @@ const InviteMemberModal = () => {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => { };
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log(data);
+  };
   return (
     <Form {...form}>
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>

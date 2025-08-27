@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 
 from contextlib import asynccontextmanager
 
+from app.api.routes.auth import m2m
 from app.api.routes.telemetry import batch, events, incidents, logs, metrics
 from app.config.settings import settings
 from app.utils.logging import setup_logging, create_logger
@@ -13,7 +14,13 @@ from app.utils.logging import setup_logging, create_logger
 from app.services.socketio_service import sio
 from app.services.database_service import init_database  # , seed_database
 
-from app.api.routes import health, organization, user_route, onboarding
+from app.api.routes import (
+    health,
+    organization,
+    organization_credentials,
+    user_route,
+    onboarding,
+)
 
 import socketio
 
@@ -61,6 +68,13 @@ app.include_router(events.router, prefix="/telemetry/events", tags=["telemetry"]
 app.include_router(incidents.router, prefix="/telemetry/incidents", tags=["telemetry"])
 app.include_router(logs.router, prefix="/telemetry/logs", tags=["telemetry"])
 app.include_router(metrics.router, prefix="/telemetry/metrics", tags=["telemetry"])
+
+# /auth/m2m routes
+app.include_router(m2m.router, prefix="/auth/m2m", tags=["auth"])
+
+app.include_router(
+    organization_credentials.router, prefix="/org/credentials", tags=["org_credentials"]
+)
 # app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
 
 

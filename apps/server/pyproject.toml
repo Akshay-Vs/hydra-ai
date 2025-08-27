@@ -25,6 +25,8 @@ dependencies = [
     "pydot>=4.0.1",
     "graphviz>=0.21",
     "hydra-types",
+    "python-jose[cryptography]>=3.5.0",
+    "bcrypt>=4.3.0",
 ]
 
 [project.optional-dependencies]

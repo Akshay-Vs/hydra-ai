@@ -92,3 +92,4 @@ def get_session():
         except Exception as e:
             logger.error(f"Error during database session: {e}")
             session.rollback()
+            raise e

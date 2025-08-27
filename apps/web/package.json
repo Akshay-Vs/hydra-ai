@@ -30,7 +30,7 @@
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "worker": "link:@serwist/next/worker",
-    "zod": "^4.0.17",
+    "zod": "^4.1.3",
     "zustand": "^5.0.7"
   },
   "devDependencies": {

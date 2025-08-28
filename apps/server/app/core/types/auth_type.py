@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -20,3 +21,11 @@ class ClientInfo(BaseModel):
     name: str
     issued_at: datetime
     expires_at: datetime
+
+
+class SessionClient(BaseModel):
+    session_id: str
+    organization_id: str
+    organization_name: Optional[str]
+    expires_at: datetime
+    last_used_at: Optional[datetime]

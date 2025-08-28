@@ -93,3 +93,8 @@ def get_session():
             logger.error(f"Error during database session: {e}")
             session.rollback()
             raise e
+
+
+async def get_db_session():
+    with get_session() as session:
+        yield session

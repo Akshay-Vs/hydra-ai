@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, List
 from typing_extensions import Optional
-from sqlmodel import Session, null, select
+from sqlmodel import Session, false, null, or_, select, true
 
 from app.models.sql_model import OrganizationCredential
 from app.utils.hash_secret import hash_secret
@@ -13,7 +13,9 @@ class OrganizationCredentialsStore:
     def __init__(self, db_session: Session):
         self.db = db_session
 
-    def get_organization_credentials(self, organization_id: str) -> Optional[Dict]:
+    def get_organization_credential(
+        self, organization_id: str, credential_id: str
+    ) -> Optional[Dict]:
         """
         Get active organization credentials
 
@@ -25,17 +27,31 @@ class OrganizationCredentialsStore:
         """
         current_time = datetime.now()
         statement = select(OrganizationCredential).where(
+            OrganizationCredential.id == credential_id,
             OrganizationCredential.organization_id == organization_id,
-            OrganizationCredential.is_active is True,
+            OrganizationCredential.is_active == true(),
             # Check if not expired
-            (
-                OrganizationCredential.expires_at
-                == null() | OrganizationCredential.expires_at
-                > current_time
+            or_(
+                OrganizationCredential.expires_at == null(),
+                OrganizationCredential.expires_at > current_time
+                if OrganizationCredential.expires_at is not None
+                else true(),
             ),
         )
         credential = self.db.exec(statement).first()
-        return {"client_secret": credential.secret_hash} if credential else None
+        return (
+            {
+                "id": credential.id,
+                "organization_id": credential.organization_id,
+                "client_secret": credential.secret_hash,
+                "expires_at": credential.expires_at,
+                "is_active": credential.is_active,
+                "created_at": credential.created_at,
+                "updated_at": credential.updated_at,
+            }
+            if credential
+            else None
+        )
 
     def create_organization_credentials(
         self,
@@ -86,7 +102,33 @@ class OrganizationCredentialsStore:
             return True
         return False
 
-    def deactivate_organization_credentials(self, organization_id: str) -> int:
+    def deactivate_organization_credential(
+        self, organization_id: str, credential_id: str
+    ) -> bool:
+        """
+        Deactivate specified credentials from an organization
+
+        Args:
+            organization_id: The organization identifier
+            credential_id: The credential ID to deactivate
+
+        Returns:
+            Boolean indicating if deactivation was successful
+        """
+        statement = select(OrganizationCredential).where(
+            OrganizationCredential.organization_id == organization_id,
+            OrganizationCredential.id == credential_id,
+            OrganizationCredential.is_active == true(),
+        )
+        credential = self.db.exec(statement).first()
+        if credential:
+            credential.is_active = False
+            self.db.add(credential)
+            self.db.commit()
+            return True
+        return False
+
+    def deactivate_all_organization_credentials(self, organization_id: str) -> int:
         """
         Deactivate all credentials for an organization
 
@@ -129,7 +171,7 @@ class OrganizationCredentialsStore:
             New OrganizationCredential object
         """
         # Deactivate existing credentials
-        self.deactivate_organization_credentials(organization_id)
+        self.deactivate_all_organization_credentials(organization_id)
 
         # Create new credential
         return self.create_organization_credentials(
@@ -140,7 +182,7 @@ class OrganizationCredentialsStore:
 
     def get_all_organization_credentials(
         self, organization_id: str, include_inactive: bool = False
-    ) -> List[OrganizationCredential]:
+    ) -> Optional[List[Dict]]:
         """
         Get all credentials for an organization
 
@@ -151,14 +193,37 @@ class OrganizationCredentialsStore:
         Returns:
             List of OrganizationCredential objects
         """
+        current_time = datetime.now()
         statement = select(OrganizationCredential).where(
-            OrganizationCredential.organization_id == organization_id
+            OrganizationCredential.organization_id == organization_id,
+            OrganizationCredential.is_active == true()
+            if not include_inactive
+            else false(),
+            # Check if not expired
+            or_(
+                OrganizationCredential.expires_at == null(),
+                OrganizationCredential.expires_at > current_time
+                if OrganizationCredential.expires_at is not None
+                else true(),
+            ),
         )
+        credential = self.db.exec(statement).all()
 
-        if not include_inactive:
-            statement = statement.where(OrganizationCredential.is_active is True)
+        if not credential:
+            return None
 
-        return list(self.db.exec(statement).all())
+        return [
+            {
+                "id": cred.id,
+                "organization_id": cred.organization_id,
+                "client_secret": cred.secret_hash,
+                "expires_at": cred.expires_at,
+                "is_active": cred.is_active,
+                "created_at": cred.created_at,
+                "updated_at": cred.updated_at,
+            }
+            for cred in credential
+        ]
 
     def cleanup_expired_credentials(self) -> int:
         """
@@ -187,7 +252,9 @@ class OrganizationCredentialsStore:
         self.db.commit()
         return count
 
-    def verify_secret(self, organization_id: str, secret: str) -> bool:
+    def verify_secret(
+        self, organization_id: str, credential_id: str, secret: str
+    ) -> bool:
         """
         Verify a secret against stored credentials
 
@@ -198,7 +265,7 @@ class OrganizationCredentialsStore:
         Returns:
             True if secret is valid, False otherwise
         """
-        credentials = self.get_organization_credentials(organization_id)
+        credentials = self.get_organization_credential(organization_id, credential_id)
         if not credentials:
             return False
 

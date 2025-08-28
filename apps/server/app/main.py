@@ -80,7 +80,8 @@ app.include_router(
 
 @app.exception_handler(HTTPException)
 async def global_exception_handler(request: Request, exc: HTTPException):
-    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    logger.error(f"HTTP exception: {exc.detail}", exc_info=True)
+    logger.debug(f"Trace: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={

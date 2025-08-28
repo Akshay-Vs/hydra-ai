@@ -77,3 +77,10 @@ class SessionStatus(str, Enum):
     ACTIVE = "active"
     EXPIRED = "expired"
     REVOKED = "revoked"
+
+
+class GrantType(str, Enum):
+    AUTHORIZATION_CODE = "authorization_code"
+    IMPLICIT = "implicit"
+    PASSWORD = "password"
+    CLIENT_CREDENTIALS = "client_credentials"

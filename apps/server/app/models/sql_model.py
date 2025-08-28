@@ -117,7 +117,8 @@ class OrganizationMember(SQLModel, table=True):
     )
     role: Optional["Role"] = Relationship(back_populates="members")
     granter: Optional["User"] = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[OrganizationMember.granted_by]"}
+        sa_relationship_kwargs={"foreign_keys": "[OrganizationMember.granted_by]"},
+        back_populates="granted_memberships",
     )
 
 

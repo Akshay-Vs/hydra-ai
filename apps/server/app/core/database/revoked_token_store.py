@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlmodel import Session, select
 from app.models.sql_model import RevokedToken
+from app.utils.now import now
 
 
 class RevokedTokenStore:
@@ -24,7 +25,10 @@ class RevokedTokenStore:
             Created RevokedToken object
         """
         revoked_token = RevokedToken(
-            token_jti=token_jti, organization_id=organization_id, expires_at=expires_at
+            token_jti=token_jti,
+            organization_id=organization_id,
+            expires_at=expires_at,
+            revoked_at=now(),
         )
         self.db.add(revoked_token)
         self.db.commit()

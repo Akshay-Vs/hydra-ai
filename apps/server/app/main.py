@@ -83,7 +83,7 @@ async def global_exception_handler(request: Request, exc: HTTPException):
     logger.error(f"HTTP exception: {exc.detail}", exc_info=True)
     logger.debug(f"Trace: {exc}", exc_info=True)
     return JSONResponse(
-        status_code=500,
+        status_code=exc.status_code if hasattr(exc, "status_code") else 500,
         content={
             "detail": exc.detail if hasattr(exc, "detail") else "Internal Server Error",
             "status_code": exc.status_code if hasattr(exc, "status_code") else 500,

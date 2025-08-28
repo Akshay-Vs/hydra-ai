@@ -141,7 +141,12 @@ async def revoke_token(
             token,
             settings.m2m_auth_secret_key,
             algorithms=[settings.m2m_auth_algorithm],
-            options={"verify_exp": False},
+            leeway=30,
+            options={
+                "verify_exp": False,
+                "verify_iat": False,
+                "verify_nbf": False,
+            },
         )
         token_jti = payload.get("jti")
 

@@ -216,7 +216,6 @@ class OrganizationCredentialsStore:
             {
                 "id": cred.id,
                 "organization_id": cred.organization_id,
-                "client_secret": cred.secret_hash,
                 "expires_at": cred.expires_at,
                 "is_active": cred.is_active,
                 "created_at": cred.created_at,

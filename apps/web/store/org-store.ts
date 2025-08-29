@@ -4,7 +4,6 @@ import type { Organization } from '@/types/org';
 interface OrgStore {
   orgs: Organization[];
   selectedOrg: Organization | null;
-  selectedOrgId: string | null;
   setOrgs: (orgs: Organization[]) => void;
   setSelectedOrg: (org: Organization) => void;
 }

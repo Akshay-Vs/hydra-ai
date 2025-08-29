@@ -26,21 +26,21 @@ const OrgSelectorDropDown = () => {
       setOrgs(data);
 
       if (params.orgid) {
-        const org = data.find(org => org.id === params.orgid)?.name;
-        if (!org?.length) return router.push('/404');
+        const org = data.find(org => org.id === params.orgid);
+        if (!org) return router.push('/404');
         setSelectedOrg(org);
       }
     }
   }, [data, setOrgs, params, setSelectedOrg, router]);
 
-  const isSelected = (org: string) => {
+  const isSelected = (org: Organization) => {
     return selectedOrg === org;
   };
 
-  const selectOrg = (org: string) => {
-    const selectedOrganization = orgs.find(o => o.name === org);
+  const selectOrg = (org_id: string) => {
+    const selectedOrganization = orgs.find(o => o.name === org_id);
     if (selectedOrganization) {
-      setSelectedOrg(selectedOrganization.name);
+      setSelectedOrg(selectedOrganization);
       router.push(`/org/${selectedOrganization.id}`);
     }
   };
@@ -55,7 +55,7 @@ const OrgSelectorDropDown = () => {
         {orgs.length > 0 && !isLoading ? (
           <>
             <p className="w-46 center overflow-x-hidden text-ellipsis line-clamp-1 select-none">
-              {selectedOrg}
+              {selectedOrg?.name}
             </p>
             <ChevronDown className="h-6 w-6 text-dull-dark pt-1" />
           </>
@@ -77,9 +77,9 @@ const OrgSelectorDropDown = () => {
         {orgs.map(org => (
           <DropdownMenuCheckboxItem
             key={org.id}
-            checked={isSelected(org.name)}
+            checked={isSelected(org)}
             onCheckedChange={() => selectOrg(org.name)}
-            className={(cn(isSelected(org.name) && 'text-accent-dark'), 'text-lg')}
+            className={(cn(isSelected(org) && 'text-accent-dark'), 'text-lg')}
           >
             {org.name}
           </DropdownMenuCheckboxItem>

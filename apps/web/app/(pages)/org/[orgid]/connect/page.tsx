@@ -5,6 +5,7 @@ const Page = () => {
   return (
     <div className="col-center gap-4  pt-4">
       <Credentials />
+      <ThirdPartyIntegration />
     </div>
   );
 };

@@ -14,7 +14,7 @@ import {
 import { ArrowUpRight, User2 } from 'lucide-react';
 
 const UserProfileDropDown = () => {
-  const { user } = useClerk();
+  const { user, signOut } = useClerk();
 
   return (
     <DropdownMenu>
@@ -29,6 +29,7 @@ const UserProfileDropDown = () => {
           <DropdownMenuItem>{user?.emailAddresses[0]?.toString()}</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+
         <DropdownMenuItem>
           <Link href="https://github.com/akshay-vs/hydra-ai" target="_blank">
             GitHub
@@ -44,7 +45,8 @@ const UserProfileDropDown = () => {
           </DropdownMenuShortcut>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => signOut()}>
           Log out
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>

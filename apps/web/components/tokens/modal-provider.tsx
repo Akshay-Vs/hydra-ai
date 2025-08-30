@@ -13,7 +13,7 @@ const ModalProvider = () => {
   return (
     <div className="absolute bg-black/20 screen center top-0% left-0 z-[999]" onClick={closeModal}>
       <Block
-        className="min-h-[44vh] h-fit w-[32vw] justify-start items-start"
+        className="min-h-52 h-fit w-[32vw] justify-start items-start bg-background-dark"
         onClick={(e: MouseEvent<HTMLDivElement>) => e.stopPropagation()}
       >
         <div className="p-4 pt-2 col full">

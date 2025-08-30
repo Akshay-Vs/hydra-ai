@@ -5,13 +5,25 @@ WORKDIR /build
 # Install uv and build tools
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Copy project files needed for build
-COPY pyproject.toml uv.lock README.md ./
-COPY app/ ./app/
+# Copy the entire monorepo structure to maintain relative paths
+COPY packages/ ./packages/
+COPY apps/server/ ./apps/server/
 
-# Create virtual environment and install build dependencies
+# Set working directory to server app
+WORKDIR /build/apps/server
+
+# First, build the local dependency (hydra-types)
+WORKDIR /build/packages/python/libs/types
 RUN uv venv
-RUN uv pip install hatchling build
+RUN uv add --dev build
+RUN uv run python -m build --wheel
+
+# Now build the main application
+WORKDIR /build/apps/server
+# Create virtual environment and install dependencies
+RUN uv venv
+RUN uv sync --frozen
+RUN uv add --dev build
 
 # Build the wheel
 RUN uv run python -m build --wheel
@@ -23,12 +35,12 @@ WORKDIR /app
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Copy wheel from build stage
-COPY --from=builder /build/dist/*.whl ./
-COPY --from=builder /build/uv.lock ./
+# Copy all built wheels (including dependencies)
+COPY --from=builder /build/apps/server/dist/ ./wheels/
+COPY --from=builder /build/packages/python/libs/types/dist/ ./wheels/
 
-# Install dependencies and the built wheel
-RUN uv pip install --system *.whl
+# Install the application with all dependencies
+RUN uv pip install --system --find-links ./wheels/ ./wheels/*.whl
 RUN uv pip install --system gunicorn
 
 # Create non-root user

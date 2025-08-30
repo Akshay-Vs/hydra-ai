@@ -6,18 +6,24 @@ import { cn } from '@hydra/ui/libs/utils';
 import { Bell, HomeIcon, Link as Link2, Settings, User2 } from 'lucide-react';
 
 import Logo from '@/public/images/Hydra_Logo.svg';
+import { useOrgStore } from '@/store/org-store';
 import IconButton from '../tokens/icon-button';
 import InviteMemberButton from '../tokens/invite-member-button';
 import OrgSelectorDropDown from '../tokens/org-selector-dropdown';
+import Spinner from '../tokens/spinner';
 
 const Nav = () => {
   const pathname = usePathname();
+  const { selectedOrg } = useOrgStore();
+
+  const orgId = selectedOrg?.id;
+  const base = `/org/${orgId}`;
+
   const navButtons = [
     {
       id: 'Home',
       icon: <HomeIcon className="h-6 w-6" />,
-      href: '/',
-      isActive: true,
+      href: base,
     },
     // {
     //   id: 'Nodes',
@@ -26,18 +32,21 @@ const Nav = () => {
     //   isActive: false,
     // },
     {
-      id: 'Integrations',
+      id: 'Connect',
       icon: <Link2 className="h-6 w-6" />,
-      href: '/integrations',
-      isActive: false,
+      href: `${base}/connect`,
     },
     {
-      id: 'Alerts',
+      id: 'Notifications',
       icon: <Bell className="h-6 w-6" />,
-      href: '/alerts',
-      isActive: false,
+      href: `${base}/notifications`,
     },
   ];
+
+  const isActive = (href: string) => {
+    return pathname === href;
+  };
+
   return (
     <nav
       className={cn(
@@ -55,13 +64,19 @@ const Nav = () => {
         />
 
         <div className="bg-surface-2-dark h-full w-fit center gap-2 border-2 border-border-dark rounded-default p-1">
-          {navButtons.map(button => (
-            <Link key={button.id} href={button.href}>
-              <IconButton isActive={button.isActive} tabindex={-1}>
-                {button.icon}
-              </IconButton>
-            </Link>
-          ))}
+          {orgId ? (
+            navButtons.map(button => (
+              <Link key={button.id} href={button.href}>
+                <IconButton isActive={isActive(button.href)} tabindex={-1}>
+                  {button.icon}
+                </IconButton>
+              </Link>
+            ))
+          ) : (
+            <div className="w-32 center">
+              <Spinner />
+            </div>
+          )}
         </div>
         <OrgSelectorDropDown />
       </div>

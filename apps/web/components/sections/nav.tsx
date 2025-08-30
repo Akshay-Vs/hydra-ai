@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@hydra/ui/libs/utils';
-import { Bell, HomeIcon, Link as Link2, Settings, User2 } from 'lucide-react';
+import { Bell, HomeIcon, Link as Link2, Settings } from 'lucide-react';
 
 import Logo from '@/public/images/Hydra_Logo.svg';
 import { useOrgStore } from '@/store/org-store';
@@ -11,6 +11,7 @@ import IconButton from '../tokens/icon-button';
 import InviteMemberButton from '../tokens/invite-member-button';
 import OrgSelectorDropDown from '../tokens/org-selector-dropdown';
 import Spinner from '../tokens/spinner';
+import UserProfileDropDown from '../tokens/user-profile';
 
 const Nav = () => {
   const pathname = usePathname();
@@ -86,14 +87,11 @@ const Nav = () => {
 
         <div className="bg-surface-2-dark h-full w-fit center gap-3 border-2 border-border-dark rounded-default p-1">
           <InviteMemberButton />
-          <div>
+          <div className="center gap-1 px-1">
             <IconButton isActive={false}>
               <Settings className="h-6 w-6" />
             </IconButton>
-
-            <IconButton isActive={false}>
-              <User2 className="h-6 w-6" />
-            </IconButton>
+            <UserProfileDropDown />{' '}
           </div>
         </div>
       </div>

@@ -12,9 +12,9 @@ type MutationFnArgs = {
   config?: AxiosRequestConfig;
 };
 
-export const useMutate = <TData = unknown, TError = unknown>(
-  options?: Omit<UseMutationOptions<TData, TError, MutationFnArgs>, 'mutationFn'>
-): UseMutationResult<TData, TError, MutationFnArgs> & {
+export const useMutate = <TData = unknown, TError = unknown, TContext = unknown>(
+  options?: Omit<UseMutationOptions<TData, TError, MutationFnArgs, TContext>, 'mutationFn'>
+): UseMutationResult<TData, TError, MutationFnArgs, TContext> & {
   lastSuccessData: TData | undefined;
 } => {
   /**
@@ -27,13 +27,18 @@ export const useMutate = <TData = unknown, TError = unknown>(
    * @param {Function} [options.onSuccess] - Callback fired on successful mutation
    * @param {Function} [options.onError] - Callback fired on failed mutation
    * @param {Function} [options.onSettled] - Callback fired when mutation settles (success or error)
+   * @param {Function} [options.onMutate] - Callback fired before mutation starts
    * @param {boolean} [options.retry] - Whether to retry failed mutations
    *
    * @example
    * ```tsx
    * const { mutate, isPending, lastSuccessData, error } = useMutate<User>({
    *   onSuccess: (user) => console.log('User created:', user.name),
-   *   onError: (error) => toast.error(error.message)
+   *   onError: (error) => toast.error(error.message),
+   *   onMutate: async (variables) => {
+   *     // Optimistic update logic here
+   *     return { previousData: 'snapshot' };
+   *   }
    * });
    *
    * const handleCreateUser = () => {
@@ -43,6 +48,32 @@ export const useMutate = <TData = unknown, TError = unknown>(
    *     data: { name: 'John Doe', email: 'john@example.com' }
    *   });
    * };
+   * ```
+   *
+   * @example
+   * ```tsx
+   * // Delete with optimistic updates
+   * const { mutate } = useMutate<void, unknown, { previousData: User[] }>({
+   *   onMutate: async ({ url }) => {
+   *     const userId = url.split('/').pop();
+   *     await queryClient.cancelQueries({ queryKey: ['users'] });
+   *
+   *     const previousData = queryClient.getQueryData<User[]>(['users']);
+   *     queryClient.setQueryData<User[]>(['users'], (old) =>
+   *       old?.filter(user => user.id !== userId) || []
+   *     );
+   *
+   *     return { previousData };
+   *   },
+   *   onError: (err, variables, context) => {
+   *     if (context?.previousData) {
+   *       queryClient.setQueryData(['users'], context.previousData);
+   *     }
+   *   },
+   *   onSettled: () => {
+   *     queryClient.invalidateQueries({ queryKey: ['users'] });
+   *   }
+   * });
    * ```
    *
    * @example
@@ -65,7 +96,6 @@ export const useMutate = <TData = unknown, TError = unknown>(
    * }
    * ```
    */
-
   const { getToken } = useAuth();
   const lastSuccessDataRef = useRef<TData | undefined>(undefined);
 
@@ -73,7 +103,6 @@ export const useMutate = <TData = unknown, TError = unknown>(
     async ({ url, method = 'POST', data, config }: MutationFnArgs) => {
       try {
         const token = await getToken();
-
         const response = await api.request<TData>({
           url,
           method,
@@ -85,14 +114,12 @@ export const useMutate = <TData = unknown, TError = unknown>(
           },
           ...config,
         });
-
         lastSuccessDataRef.current = response.data;
         return response.data;
       } catch (error) {
         if (error && typeof error === 'object' && 'isAxiosError' in error) {
           const axiosError = error as AxiosError;
           const status = axiosError.response?.status;
-
           if (status === 401 || status === 403) {
             throw new Error('Authentication failed. Please log in again.');
           }
@@ -106,7 +133,7 @@ export const useMutate = <TData = unknown, TError = unknown>(
     [getToken]
   );
 
-  const mutation = useMutation<TData, TError, MutationFnArgs>({
+  const mutation = useMutation<TData, TError, MutationFnArgs, TContext>({
     mutationFn,
     ...options,
   });

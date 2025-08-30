@@ -2,9 +2,9 @@ import Image from 'next/image';
 import { Connection, Loading } from '@clerk/elements/common';
 import { Root } from '@clerk/elements/sign-in';
 import { Button } from '@hydra/ui/button';
-import { Loader } from 'lucide-react';
 import { FaGithub, FaGoogle } from 'react-icons/fa';
 import Logo from '@/public/images/Hydra_Logo.svg';
+import Spinner from '../tokens/spinner';
 import Block from '../wrappers/block';
 
 const SignInModal = () => {
@@ -28,7 +28,7 @@ const SignInModal = () => {
               <Connection name="github" asChild>
                 <Button disabled={isGlobalLoading} className="w-full h-12">
                   <Loading scope="provider:github">
-                    {isLoading => (isLoading ? <Loader /> : <FaGithub className="text-xl" />)}
+                    {isLoading => (isLoading ? <Spinner /> : <FaGithub className="text-xl" />)}
                   </Loading>
                 </Button>
               </Connection>
@@ -36,7 +36,7 @@ const SignInModal = () => {
               <Connection name="google" asChild>
                 <Button disabled={isGlobalLoading} className="w-full h-12">
                   <Loading scope="provider:google">
-                    {isLoading => (isLoading ? <Loader /> : <FaGoogle className="text-xl" />)}
+                    {isLoading => (isLoading ? <Spinner /> : <FaGoogle className="text-xl" />)}
                   </Loading>
                 </Button>
               </Connection>

@@ -15,21 +15,21 @@ const Credentials = () => {
   );
 
   return (
-    <Block className="full col min-h-[48dvh] !justify-start items-start">
+    <Block className="full col min-h-[48dvh] !justify-start items-start relative">
       <div className="flex w-full justify-between items-center pb-4">
-        <h1 className="px-1 text-2xl">Client Connection Credentials</h1>
+        <h1 className="px-2 text-2xl">Client Connection Credentials</h1>
         <NewCredentialButton />
       </div>
       <div className="full center">
         {isLoading ? (
-          <div className="col center full min-h-[48dvh]">
+          <div className="col center full abs-center">
             <Spinner />
             <p className="text-center text-muted-foreground pt-2">Loading credentials...</p>
           </div>
         ) : null}
 
         {!isLoading && !data && (
-          <div className="col center full min-h-[48dvh]">
+          <div className="col center full abs-center">
             <p className="text-center text-muted-foreground">No credentials found.</p>
           </div>
         )}

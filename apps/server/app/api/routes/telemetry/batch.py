@@ -8,6 +8,7 @@ logger = create_logger(__name__)
 
 
 @router.post("/")
+# TODO: Perform M2M authentication
 def receive_batch(batch: TelemetryBatch):
     """
     Receive a batch of data for processing.

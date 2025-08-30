@@ -38,7 +38,7 @@ const ClientCredentialsModal = ({ credentials }: Props) => {
                 {key.toUpperCase()}
                 <span>=</span>
               </span>
-              <span className="flex-wrap overflow-clip">{value}</span>
+              <span className="flex-wrap overflow-clip break-all">{value}</span>
             </div>
           ))}
         </div>

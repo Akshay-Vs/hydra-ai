@@ -1,15 +1,24 @@
-import type { PropsWithChildren } from 'react';
+import type { ComponentProps, PropsWithChildren } from 'react';
 import { Button } from '@hydra/ui/button';
 import { cn } from '@hydra/ui/libs/utils';
 
-type iconButtonProps = PropsWithChildren & {
-  onClick?: () => void;
-  isActive?: boolean;
-  asChild?: boolean;
-  tabindex?: number;
-};
+type iconButtonProps = PropsWithChildren &
+  ComponentProps<'button'> & {
+    onClick?: () => void;
+    isActive?: boolean;
+    asChild?: boolean;
+    tabindex?: number;
+  };
 
-const IconButton = ({ children, onClick, isActive, asChild, tabindex }: iconButtonProps) => {
+const IconButton = ({
+  children,
+  onClick,
+  isActive,
+  asChild,
+  tabindex,
+  title,
+  'aria-label': label,
+}: iconButtonProps) => {
   return (
     <Button
       variant="icon"
@@ -19,6 +28,8 @@ const IconButton = ({ children, onClick, isActive, asChild, tabindex }: iconButt
       data-active={isActive}
       asChild={asChild}
       tabIndex={tabindex}
+      title={title}
+      aria-label={label}
     >
       {children}
     </Button>

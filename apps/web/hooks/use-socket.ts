@@ -13,6 +13,7 @@ export const useSocket = () => {
 
     const connect = async () => {
       try {
+        if (isConnected) socketManager.disconnect();
         await socketManager.connect(getToken, selectedOrg?.id);
         if (mounted) {
           setIsConnected(true);
@@ -31,8 +32,8 @@ export const useSocket = () => {
     // Listen to connection events
     const handleConnect = () => {
       if (mounted) setIsConnected(true);
-      if (roomId) {
-        socketManager.emit('joinRoom', { roomId });
+      if (roomId && selectedOrg?.id) {
+        socketManager.joinRoom(selectedOrg.id);
       }
     };
 
@@ -48,7 +49,7 @@ export const useSocket = () => {
       socketManager.off('connect', handleConnect);
       socketManager.off('disconnect', handleDisconnect);
     };
-  }, [getToken, setError, setIsConnected, selectedOrg?.id, roomId, setRoomId]);
+  }, [getToken, setError, setIsConnected, selectedOrg?.id, roomId, setRoomId, isConnected]);
 
   const emit = <T>(event: string, data?: T) => {
     socketManager.emit(event, data);

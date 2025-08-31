@@ -1,11 +1,15 @@
+from logging import warn
 from app.config.settings import settings
 from app.core.auth.clerk_auth import ClerkAuth
 from app.core.auth.session_manager import SessionManager
 from app.core.helpers.socket_auth import create_ws_auth_decorators
+from app.services.database_service import get_session
 from app.utils.logging import create_logger
 from socketio.exceptions import ConnectionRefusedError
 
 import socketio
+
+from app.utils.now import now
 
 logger = create_logger(__name__)
 
@@ -47,7 +51,9 @@ async def connect(sid, environ, auth):
                 {"error_code": "CONFIG_ERROR", "status_code": 500},
             )
         authenticator = ClerkAuth(settings.clerk_secret_key)
+
         user = await authenticator.authenticate_ASGI(environ, auth["token"])
+        org_id = auth.get("org_id")
 
         logger.debug(f"Validated user: {user}, \n type: {type(user)}")
 
@@ -57,11 +63,14 @@ async def connect(sid, environ, auth):
             )
 
         # Create session data
-        user_session = await session_manager.create_session(sid, user)
+        with get_session() as session:
+            user_session = await session_manager.create_session(
+                sid, user, org_id, session
+            )
 
-        # Join the user to their session room
-        await sio.enter_room(sid, f"user_{user_session.user_id}")
-        await sio.enter_room(sid, f"org_{user_session.org_id}")
+            # Join the user to their session room
+            await sio.enter_room(sid, f"user_{user_session.user_id}")
+            await sio.enter_room(sid, f"org_{user_session.org_id}")
 
     except Exception as e:
         logger.error(f"Authentication failed for client {sid}: {str(e)}")
@@ -81,7 +90,20 @@ async def disconnect(sid, reason):
 
 
 @sio.event
-@require_permission("chat")
+@require_permission("write")
+async def log(sid, session, data):
+    logger.info(f"Received ping from {sid}")
+    logger.debug(f"Ping data: {data} to session: {session.org_id}")
+    await sio.emit(
+        "new-log",
+        data,
+        room=f"org_{session.org_id}",
+    )
+    return "new-log event sent"
+
+
+@sio.event
+@require_permission("write")
 async def message(sid, session, data):
     logger.info(f"Received message from {sid}: {data}")
     # Echo the message back to the client

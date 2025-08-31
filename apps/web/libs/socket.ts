@@ -1,12 +1,11 @@
 // utils/socket.ts
-import { warn } from "console";
-import type { Socket } from "socket.io-client";
-import { io } from "socket.io-client";
+import type { Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 export type EventCallback<T> = (data: T) => void;
 export type EventCallbackWithAck<T = unknown> = (
   data: T,
-  ack?: (response: unknown) => void,
+  ack?: (response: unknown) => void
 ) => void;
 
 export interface SocketConfig {
@@ -14,7 +13,7 @@ export interface SocketConfig {
   timeout?: number;
   reconnectionAttempts?: number;
   reconnectionDelay?: number;
-  transports?: ("websocket" | "polling")[];
+  transports?: ('websocket' | 'polling')[];
   autoConnect?: boolean;
 }
 
@@ -26,14 +25,11 @@ class SocketManager {
 
   constructor(config: SocketConfig = {}) {
     this.config = {
-      url:
-        config.url ??
-        process.env.NEXT_PUBLIC_BACKEND_BASE_URL ??
-        "http://localhost:8000",
+      url: config.url ?? process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? 'http://localhost:8000',
       timeout: config.timeout ?? 10000,
       reconnectionAttempts: config.reconnectionAttempts ?? 5,
       reconnectionDelay: config.reconnectionDelay ?? 1000,
-      transports: config.transports ?? ["websocket", "polling"],
+      transports: config.transports ?? ['websocket', 'polling'],
       autoConnect: config.autoConnect ?? true,
     };
   }
@@ -41,7 +37,7 @@ class SocketManager {
   async connect(
     getToken: () => Promise<string | null>,
     org_id?: string,
-    additionalAuth: Record<string, unknown> = {},
+    additionalAuth: Record<string, unknown> = {}
   ): Promise<Socket> {
     if (this.socket?.connected) {
       return this.socket;
@@ -52,7 +48,7 @@ class SocketManager {
     try {
       const token = await getToken();
       if (!token) {
-        throw new Error("No authentication token available");
+        throw new Error('No authentication token available');
       }
 
       // Disconnect existing socket if any
@@ -81,34 +77,34 @@ class SocketManager {
       this.reregisterEventListeners();
 
       return new Promise((resolve, reject) => {
-        if (!this.socket) return reject(new Error("Socket not initialized"));
+        if (!this.socket) return reject(new Error('Socket not initialized'));
 
         const connectHandler = () => {
-          console.log("Connected to Socket.IO server");
+          console.log('Connected to Socket.IO server');
           if (this.socket) {
             resolve(this.socket);
           }
         };
 
         const errorHandler = (error: Error) => {
-          console.error("Socket.IO connection error:", error);
+          console.error('Socket.IO connection error:', error);
           reject(error);
         };
 
-        this.socket.once("connect", connectHandler);
-        this.socket.once("connect_error", errorHandler);
+        this.socket.once('connect', connectHandler);
+        this.socket.once('connect_error', errorHandler);
 
         // Handle initial connection timeout
         setTimeout(() => {
           if (!this.socket?.connected) {
-            this.socket?.off("connect", connectHandler);
-            this.socket?.off("connect_error", errorHandler);
-            reject(new Error("Connection timeout"));
+            this.socket?.off('connect', connectHandler);
+            this.socket?.off('connect_error', errorHandler);
+            reject(new Error('Connection timeout'));
           }
         }, this.config.timeout);
       });
     } catch (error) {
-      console.error("Failed to connect to socket:", error);
+      console.error('Failed to connect to socket:', error);
       throw error;
     }
   }
@@ -116,13 +112,13 @@ class SocketManager {
   private setupCoreEventListeners() {
     if (!this.socket) return;
 
-    this.socket.on("disconnect", (reason) => {
-      console.log("Disconnected from server:", reason);
+    this.socket.on('disconnect', reason => {
+      console.log('Disconnected from server:', reason);
     });
 
     // Handle reconnection with fresh token
-    this.socket.on("reconnect_attempt", async () => {
-      console.log("Attempting to reconnect...");
+    this.socket.on('reconnect_attempt', async () => {
+      console.log('Attempting to reconnect...');
       try {
         if (this.getTokenFn) {
           const token = await this.getTokenFn();
@@ -131,16 +127,16 @@ class SocketManager {
           }
         }
       } catch (error) {
-        console.error("Failed to refresh token for reconnection:", error);
+        console.error('Failed to refresh token for reconnection:', error);
       }
     });
 
-    this.socket.on("reconnect", () => {
-      console.log("Successfully reconnected to server");
+    this.socket.on('reconnect', () => {
+      console.log('Successfully reconnected to server');
     });
 
-    this.socket.on("reconnect_failed", () => {
-      console.error("Failed to reconnect after maximum attempts");
+    this.socket.on('reconnect_failed', () => {
+      console.error('Failed to reconnect after maximum attempts');
     });
   }
 
@@ -148,7 +144,7 @@ class SocketManager {
     if (!this.socket) return;
 
     this.eventListeners.forEach((callbacks, event) => {
-      callbacks.forEach((callback) => {
+      callbacks.forEach(callback => {
         if (this.socket) {
           this.socket.on(event, callback);
         }
@@ -159,7 +155,7 @@ class SocketManager {
   // Generic emit method for any event
   emit<T = unknown>(event: string, data?: T): void {
     if (!this.socket?.connected) {
-      throw new Error("Socket not connected");
+      throw new Error('Socket not connected');
     }
     this.socket.emit(event, data);
   }
@@ -168,7 +164,7 @@ class SocketManager {
   emitWithAck<T = unknown, R = unknown>(event: string, data?: T): Promise<R> {
     return new Promise((resolve, reject) => {
       if (!this.socket?.connected) {
-        reject(new Error("Socket not connected"));
+        reject(new Error('Socket not connected'));
         return;
       }
 
@@ -244,17 +240,17 @@ class SocketManager {
 
   // Join a room
   joinRoom(room: string): void {
-    this.emit("join_room", { room });
+    this.emit('join_room', { room });
   }
 
   // Leave a room
   leaveRoom(room: string): void {
-    this.emit("leave_room", { room });
+    this.emit('leave_room', { room });
   }
 
   // Emit to a specific room
   emitToRoom<T = unknown>(room: string, event: string, data?: T): void {
-    this.emit("room_message", { room, event, data });
+    this.emit('room_message', { room, event, data });
   }
 
   // Disconnect from server

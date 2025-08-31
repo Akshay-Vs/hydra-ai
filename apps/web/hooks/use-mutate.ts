@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { useAuth } from '@clerk/nextjs';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { AxiosRequestConfig, AxiosError } from 'axios';
 import { api } from '@/libs/api';
+import { useBearerToken } from './use-bearer-token';
 
 type MutationFnArgs = {
   url: string;
@@ -17,6 +17,7 @@ export const useMutate = <TData = unknown, TError = unknown, TContext = unknown>
 ): UseMutationResult<TData, TError, MutationFnArgs, TContext> & {
   lastSuccessData: TData | undefined;
 } => {
+  //#region JSDoc
   /**
    * A custom React hook that wraps TanStack Query's
    * useMutation with enhanced API request capabilities.
@@ -96,13 +97,13 @@ export const useMutate = <TData = unknown, TError = unknown, TContext = unknown>
    * }
    * ```
    */
-  const { getToken } = useAuth();
+  //#endregion
+  const { token } = useBearerToken();
   const lastSuccessDataRef = useRef<TData | undefined>(undefined);
 
   const mutationFn = useCallback(
     async ({ url, method = 'POST', data, config }: MutationFnArgs) => {
       try {
-        const token = await getToken();
         const response = await api.request<TData>({
           url,
           method,
@@ -130,7 +131,7 @@ export const useMutate = <TData = unknown, TError = unknown, TContext = unknown>
         throw error;
       }
     },
-    [getToken]
+    [token]
   );
 
   const mutation = useMutation<TData, TError, MutationFnArgs, TContext>({

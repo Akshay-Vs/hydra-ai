@@ -38,7 +38,7 @@ class UserSession(BaseModel):
     username: Nullable[str]
     email: List[EmailAddress]
     roles: list
-    permissions: set
+    permissions: list
     connected_at: datetime
     last_activity: datetime
     metadata: Optional[dict] = None

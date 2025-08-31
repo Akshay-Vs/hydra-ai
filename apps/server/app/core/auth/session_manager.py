@@ -1,10 +1,14 @@
 from clerk_backend_api import User
+from app.core.database.organization_store import OrganizationStore
+from app.core.database.user_store import UserStore
 from app.core.types.user_type import UserSession
 from app.utils.logging import create_logger
 from typing import Dict, Set, Any
 from fastapi import HTTPException
 from datetime import datetime
 import asyncio
+from sqlmodel import Session as dbSession
+from app.core.helpers.ensure_membership import ensure_org_membership
 
 logger = create_logger(__name__)
 
@@ -28,22 +32,62 @@ class SessionManager:
             )
         return str(value)
 
-    async def create_session(self, sid, user: User) -> UserSession:
+    async def create_session(
+        self, sid, user: User, org_id: str, session: dbSession
+    ) -> UserSession:
         async with self._lock:
+            organization_store = OrganizationStore(session)
+            user_store = UserStore(session)
+
+            logger.debug(f"Creating session for user {user.username} in org {org_id}")
+            org = organization_store.get_organization(org_id)
+            if not org:
+                raise HTTPException(status_code=404, detail="Organization not found")
+
+            logger.debug(f"Fetching user record for Clerk ID {user.id}")
+            user_record = user_store.get_user_by_clerk_id(user.id)
+            if not user_record:
+                raise HTTPException(status_code=404, detail="User not found")
+
+            # Ensure user is a member of the organization
+            logger.debug(
+                f"Ensuring user {user.username} (ID: {user_record.id}) is a member of org {org_id}"
+            )
+            ensure_org_membership(session, org_id, user_record)
+
+            # Fetch user roles and permissions
+            logger.debug(
+                f"Fetching roles for user {user.username} (ID: {user_record.id}) in org {org_id}"
+            )
+            user_roles = user_store.get_user_roles(user_record.id, org_id)
+
+            logger.debug(f"User {user.username} roles in org {org_id}: {user_roles}")
+
+            logger.debug(
+                f"Fetching permissions for user {user.username} (ID: {user_record.id}) in org {org_id}"
+            )
+            user_permissions = user_store.get_user_role_permissions(
+                user_record.id, org_id
+            )
+            logger.debug(
+                f"User {user.username} permissions in org {org_id}: {user_permissions}"
+            )
+
+            logger.debug(
+                f"User {user.username} roles in org {org_id}: {user_roles}, permissions: {user_permissions}"
+            )
             user_session = UserSession(
                 user_id=user.id,
                 username=user.username,
                 email=user.email_addresses,
-                org_id="NOT_IMPLEMENTED",  #! Placeholder, org_id should be set properly
-                roles=["user"],  #! Placeholder, roles should be set properly
-                permissions={
-                    "read",
-                    "chat",
-                },  #! Placeholder, permissions should be set properly
+                org_id=org.id,
+                roles=user_roles,
+                permissions=user_permissions,
                 connected_at=datetime.now(),
                 last_activity=datetime.now(),
             )
 
+        logger.debug(f"Storing session {sid} for user {user_session.username}")
         self.sessions[sid] = user_session
 
         # Track user sessions

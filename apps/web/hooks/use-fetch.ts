@@ -1,23 +1,17 @@
 // useFetch.ts
-import { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { AxiosRequestConfig } from 'axios';
 import { api } from '@/libs/api';
+import { useBearerToken } from './use-bearer-token';
 
-export const useFetch = <TData = unknown,>(
+export const useFetch = <TData = unknown>(
   key: string | unknown[],
   url: string,
   config?: AxiosRequestConfig,
   options?: Omit<UseQueryOptions<TData>, 'queryKey' | 'queryFn'>
 ) => {
-  const { getToken } = useAuth();
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    getToken().then(setToken);
-  }, [getToken]);
+  const { token } = useBearerToken();
 
   return useQuery<TData>({
     queryKey: [...(Array.isArray(key) ? key : [key]), token],

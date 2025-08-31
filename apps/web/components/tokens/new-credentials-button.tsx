@@ -49,7 +49,7 @@ const NewCredentialButton = () => {
 
   return (
     <Button
-      className="px-8 h-14 w-44 border-2 border-border-dark bg-surface-2-dark"
+      className="px-8 h-14 w-44 border-2 border-border-dark bg-surface-2-dark z-50"
       onClick={handleOpen}
       disabled={isPending}
     >

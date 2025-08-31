@@ -30,13 +30,13 @@ const LiveTail = () => {
   useEffect(() => {
     const handleNewLog = (log: LogEntryType) => {
       setLogs(prevLogs => [...prevLogs, log].slice(-100));
-      if (ref.current && !isHovered) {
+      if (ref.current && !isHovered && isAtBottom) {
         scrollToBottom();
       }
 
       if (ref?.current?.parentElement) {
         const { scrollTop, scrollHeight, clientHeight } = ref.current.parentElement;
-        const margin = 100;
+        const margin = 200;
         const atBottom = scrollTop + clientHeight >= scrollHeight - margin;
         setIsAtBottom(atBottom);
         if (atBottom && !isHovered) {
@@ -49,7 +49,7 @@ const LiveTail = () => {
     return () => {
       off<LogEntryType>('new-log', handleNewLog);
     };
-  }, [on, off, isHovered]);
+  }, [on, off, isHovered, isAtBottom]);
 
   return (
     <div className="full">

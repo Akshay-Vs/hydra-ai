@@ -303,8 +303,8 @@ class Metric(SQLModel, table=True):
         {"comment": "SET TIFLASH REPLICA 1"},
     )
 
-    id: str = Field(primary_key=True)
-    metric_id: Optional[int] = Field(default=None, primary_key=True)
+    id: str = Field(primary_key=True, default_factory=cuid)
+    metric_id: str = Field(default_factory=cuid, primary_key=True)
     timestamp: datetime = Field(default_factory=now(), index=True)
     service_name: str = Field(max_length=128, index=True)
     metric_name: str = Field(max_length=64)
@@ -333,8 +333,8 @@ class Log(SQLModel, table=True):
         {"comment": "SET TIFLASH REPLICA 1"},
     )
 
-    id: str = Field(primary_key=True)
-    log_id: Optional[int] = Field(default=None, primary_key=True)
+    id: str = Field(primary_key=True, default_factory=cuid)
+    log_id: str = Field(default_factory=cuid, primary_key=True)
     timestamp: datetime = Field(default_factory=now(), index=True)
     service_name: str = Field(max_length=128, index=True)
     level: LogLevelEnum
@@ -368,8 +368,8 @@ class Incident(SQLModel, table=True):
         {"comment": "SET TIFLASH REPLICA 1"},
     )
 
-    id: str = Field(primary_key=True)
-    incident_id: str = Field(primary_key=True)
+    id: str = Field(primary_key=True, default_factory=cuid)
+    incident_id: str = Field(primary_key=True, default_factory=cuid)
     timestamp: datetime = Field(default_factory=now(), index=True)
     service_name: str = Field(max_length=128, index=True)
     severity: SeverityEnum

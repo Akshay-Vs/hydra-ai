@@ -1,6 +1,8 @@
+from contextlib import asynccontextmanager
 from typing import Optional
 from functools import wraps
 from fastapi import FastAPI
+import fastapi
 
 
 from .hydra_config import HydraConfig
@@ -46,15 +48,16 @@ def setup_hydra_telemetry(app: FastAPI, config: HydraConfig) -> HydraTelemetryCl
     _global_hydra_client = client
 
     # Add middleware
-    app.add_middleware(HydraMiddleware, hydra_client=client)
 
-    # Setup lifespan events
-    @app.on_event("startup")
-    async def startup_event():
+    @asynccontextmanager
+    async def lifespan(app: fastapi.FastAPI):
+        # Startup
         await client.start()
-
-    @app.on_event("shutdown")
-    async def shutdown_event():
+        yield
+        # Shutdown
         await client.stop()
+
+    app.router.lifespan_context = lifespan
+    app.add_middleware(HydraMiddleware, hydra_client=client)
 
     return client

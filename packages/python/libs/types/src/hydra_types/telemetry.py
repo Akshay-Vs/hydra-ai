@@ -62,6 +62,8 @@ class Incident(BaseModel):
     description: Optional[str] = None
     status: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
+    error_signature: Optional[str] = None
+    context_data: Optional[Dict[str, Any]] = None
 
 
 class TelemetryBatch(BaseModel):

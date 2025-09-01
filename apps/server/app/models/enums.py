@@ -13,6 +13,7 @@ class StatusEnum(str, Enum):
     ANALYZING = "analyzing"
     RESOLVED = "resolved"
     ESCALATED = "escalated"
+    CLOSED = "closed"
 
 
 class LogLevelEnum(str, Enum):

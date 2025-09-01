@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import asynccontextmanager
 from datetime import datetime
 import os
 from fastapi import FastAPI
@@ -11,17 +12,18 @@ from hydra_sdk import (
 from hydra_sdk.hydra_config import HydraConfig
 from dotenv import load_dotenv
 
-app = FastAPI()
 load_dotenv()
+app = FastAPI()
+
 
 # Setup telemetry configuration
 config = HydraConfig(
     app_id="your-app-id",
     secret_key="your-secret-key",
     service_name="my-fastapi-service",
-    batch_interval=60,  # Send every 60 seconds
+    batch_interval=30,  # Send every 30 seconds
     max_batch_size=100,
-    system_metrics_interval=60,
+    system_metrics_interval=90,  # Collect system metrics every 90 seconds
     timeout=30,
     hydra_base_url=os.getenv("HYDRA_BASE_URL", "http://localhost:8000"),
 )
@@ -33,17 +35,15 @@ hydra_client = setup_hydra_telemetry(app, config)
 # hydra_client = HydraTelemetryClient(config, use_contextual_logging=True)
 
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
     """Start telemetry client on application startup"""
     client = get_hydra_client()
     if client:
         await client.start()
         await client.log_info("FastAPI application started", version="1.0.0")
+    yield
 
-
-@app.on_event("shutdown")
-async def shutdown_event():
     """Stop telemetry client on application shutdown"""
     client = get_hydra_client()
     if client:

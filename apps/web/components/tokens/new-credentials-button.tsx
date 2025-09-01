@@ -8,9 +8,9 @@ import ClientCredentialsModal from '../modals/client-credentials-modal';
 import Spinner from './spinner';
 
 type Credentials = {
-  organization_id: string;
-  client_secret: string;
-  credential_id: string;
+  hydra_org_id: string;
+  hydra_cred_id: string;
+  hydra_client_secret: string;
   expires_at: string;
 };
 
@@ -42,7 +42,14 @@ const NewCredentialButton = () => {
       setTitle('Client Credentials');
       setDescription('Copy and paste these credentials to your .env file.');
 
-      setContent(<ClientCredentialsModal credentials={credentials} />);
+      setContent(
+        <ClientCredentialsModal
+          credentials={{
+            hydra_base_url: process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? 'your-backend-url',
+            ...credentials,
+          }}
+        />
+      );
       openModal();
     }
   }, [data, openModal, setContent, setDescription, setTitle]);

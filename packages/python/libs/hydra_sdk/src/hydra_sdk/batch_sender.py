@@ -1,9 +1,12 @@
 import asyncio
 import logging
-import time
+import os
 from typing import List, Optional
 import httpx
 from hydra_types.telemetry import Metric, Log, Trace, Event, Incident, TelemetryBatch
+
+from hydra_sdk.auth_manager import AuthManager
+from hydra_sdk.utils import _now
 from .hydra_config import HydraConfig
 
 
@@ -23,16 +26,39 @@ class BatchSender:
         self._events: List[Event] = []
         self._incidents: List[Incident] = []
 
+        # Initialize AuthManager
+        self.base_url = os.getenv("HYDRA_BASE_URL", "").rstrip("/")
+        self.org_id = os.getenv("HYDRA_ORG_ID", "")
+        self.cred_id = os.getenv("HYDRA_CRED_ID", "")
+        self.client_secret = os.getenv("HYDRA_CLIENT_SECRET", "")
+
+        if not all([self.base_url, self.org_id, self.cred_id, self.client_secret]):
+            raise ValueError(
+                "Missing required environment variables for AuthManager, "
+                + "please set HYDRA_BASE_URL, HYDRA_ORG_ID, HYDRA_CRED_ID, and HYDRA_CLIENT_SECRET"
+            )
+
+        self.auth = AuthManager(
+            base_url=self.base_url,
+            org_id=self.org_id,
+            cred_id=self.cred_id,
+            client_secret=self.client_secret,
+        )
+
     async def start(self):
         """Start the batch sender and HTTP client"""
-        if not self.config.app_id or not self.config.secret_key:
-            raise ValueError("app_id and secret_key must be set in the configuration")
+        token = await self.auth.get_token()
+        if not token:
+            raise RuntimeError("Failed to obtain access token for authentication")
 
-        auth = httpx.BasicAuth(self.config.app_id, self.config.secret_key)
+        auth_header = await self.auth.get_auth_header()
+
         self._http_client = httpx.AsyncClient(
-            auth=auth,
             timeout=self.config.timeout,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": auth_header["Authorization"],
+            },
         )
 
         # Start background batch worker
@@ -121,7 +147,7 @@ class BatchSender:
             events=self._events[:max_size],
             incidents=self._incidents[:max_size],
             source_system=self.config.service_name,
-            export_timestamp=self._current_timestamp(),
+            export_timestamp=_now(),
         )
 
     async def _send_to_api(self, batch: TelemetryBatch):
@@ -129,7 +155,7 @@ class BatchSender:
         if not self._http_client:
             raise RuntimeError("HTTP client not initialized")
 
-        url = "http://localhost:8000/telemetry/batch/"
+        url = f"{self.base_url}/telemetry/batch/"
         json_data = batch.model_dump_json(indent=2, exclude_none=True)
 
         self.logger.debug(f"Sending telemetry batch to {url}")
@@ -148,7 +174,3 @@ class BatchSender:
         self._traces = self._traces[max_size:]
         self._events = self._events[max_size:]
         self._incidents = self._incidents[max_size:]
-
-    def _current_timestamp(self) -> int:
-        """Get current timestamp in milliseconds"""
-        return int(time.time() * 1000)

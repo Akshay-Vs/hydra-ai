@@ -1,6 +1,7 @@
-import time
 from typing import Optional, Dict, Any, Callable, Awaitable
 from hydra_types.telemetry import Log
+
+from hydra_sdk.utils import _now
 
 
 class LogHelper:
@@ -60,7 +61,7 @@ class LogHelper:
             trace_id, span_id = self._trace_context_provider()
 
         log = Log(
-            timestamp=self._current_timestamp(),
+            timestamp=_now(),
             service_name=self.service_name,
             level=level.upper(),
             message=message,
@@ -70,10 +71,6 @@ class LogHelper:
         )
 
         await self._log_callback(log)
-
-    def _current_timestamp(self) -> int:
-        """Get current timestamp in milliseconds"""
-        return int(time.time() * 1000)
 
 
 class ContextualLogHelper(LogHelper):

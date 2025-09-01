@@ -27,9 +27,9 @@ class OrgCredRequest(BaseModel):
 
 
 class OrgCredResponse(BaseModel):
-    organization_id: str
-    client_secret: str
-    credential_id: str
+    hydra_org_id: str
+    hydra_cred_id: str
+    hydra_client_secret: str
     expires_at: str
 
 
@@ -64,11 +64,12 @@ async def generate_organization_credentials(
             )
 
             return OrgCredResponse(
-                organization_id=credentials.organization_id,
-                credential_id=credentials.id,
-                client_secret=secret,
+                hydra_org_id=payload.organization_id,
+                hydra_cred_id=credentials.id,
+                hydra_client_secret=secret,
                 expires_at=expires_at.isoformat(),
             )
+
     except HTTPException as e:
         logger.error(f"Error generating credentials: {e.detail}")
         raise e

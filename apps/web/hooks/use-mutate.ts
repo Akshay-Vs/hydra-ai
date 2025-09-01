@@ -110,8 +110,8 @@ export const useMutate = <TData = unknown, TError = unknown, TContext = unknown>
           data,
           timeout: 30000,
           headers: {
-            ...(token && { Authorization: `Bearer ${token}` }),
             ...config?.headers,
+            ...(token && { Authorization: `Bearer ${token}` }),
           },
           ...config,
         });

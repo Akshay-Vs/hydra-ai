@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import SplashScreen from '@/components/tokens/splash-screen';
+import { useBearerToken } from '@/hooks/use-bearer-token';
 import useIsClient from '@/hooks/use-isclient';
 import { useMutate } from '@/hooks/use-mutate';
 
@@ -16,6 +17,7 @@ type OnboardingData = {
 const OnboardingPage = () => {
   const router = useRouter();
   const isMounted = useIsClient();
+  const { isLoaded } = useBearerToken();
 
   const { mutateAsync, error, isPending } = useMutate<OnboardingData>({
     onSuccess: data => {
@@ -26,8 +28,8 @@ const OnboardingPage = () => {
   });
 
   useEffect(() => {
-    mutateAsync({ url: '/onboarding', method: 'POST' });
-  }, [mutateAsync]);
+    if (isLoaded) mutateAsync({ url: '/onboarding', method: 'POST' });
+  }, [mutateAsync, isLoaded]);
 
   if (!isMounted) return null;
   if (error)

@@ -1,7 +1,6 @@
 import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime
-import os
 from fastapi import FastAPI
 from hydra_sdk import (
     HydraTelemetryClient,
@@ -18,14 +17,11 @@ app = FastAPI()
 
 # Setup telemetry configuration
 config = HydraConfig(
-    app_id="your-app-id",
-    secret_key="your-secret-key",
     service_name="my-fastapi-service",
     batch_interval=30,  # Send every 30 seconds
     max_batch_size=100,
     system_metrics_interval=90,  # Collect system metrics every 90 seconds
     timeout=30,
-    hydra_base_url=os.getenv("HYDRA_BASE_URL", "http://localhost:8000"),
 )
 
 # Initialize telemetry client

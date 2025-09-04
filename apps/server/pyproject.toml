@@ -27,6 +27,7 @@ dependencies = [
     "hydra-types",
     "python-jose[cryptography]>=3.5.0",
     "bcrypt>=4.3.0",
+    "fastmcp==2.12.2",
 ]
 
 [project.optional-dependencies]

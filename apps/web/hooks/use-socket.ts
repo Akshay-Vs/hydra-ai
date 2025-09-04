@@ -13,6 +13,9 @@ export const useSocket = () => {
 
     const connect = async () => {
       try {
+        if (!selectedOrg?.id) {
+          return;
+        }
         if (isConnected) socketManager.disconnect();
         await socketManager.connect(getToken, selectedOrg?.id);
         if (mounted) {

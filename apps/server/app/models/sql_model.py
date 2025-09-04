@@ -94,6 +94,7 @@ class Organization(SQLModel, table=True):
     execution_logs: List["AgentExecutionLog"] = Relationship(
         back_populates="organization"
     )
+    mcp_servers: List["MCPServer"] = Relationship(back_populates="organization")
 
 
 class OrganizationMember(SQLModel, table=True):
@@ -527,3 +528,22 @@ class AgentExecutionLog(SQLModel, table=True):
     organization: Optional["Organization"] = Relationship(
         back_populates="execution_logs"
     )
+
+
+###########################################################################
+############################### MCP Servers ###############################
+###########################################################################
+class MCPServer(TimestampMixin, table=True):
+    __tablename__ = "mcp_servers"  # type: ignore
+
+    id: str = Field(default_factory=cuid, primary_key=True)
+    name: str = Field(index=True, unique=True)
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    auth_token: bytes
+    url: str = Field(index=True, unique=True)
+    is_active: bool = Field(default=True)
+    organization_id: str = Field(default=None, foreign_key="organizations.id")
+
+    # Relationships
+    organization: Optional["Organization"] = Relationship(back_populates="mcp_servers")

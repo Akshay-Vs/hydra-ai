@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from app.api.routes.auth import m2m
 from app.api.routes.telemetry import batch, events, incidents, logs, metrics
 from app.config.settings import settings
+from app.api.routes.mcp import mcp
 from app.utils.logging import setup_logging, create_logger
 
 from app.services.socketio_service import sio
@@ -24,7 +25,6 @@ from app.api.routes import (
 
 import socketio
 
-
 logger = create_logger("main")
 
 
@@ -37,6 +37,7 @@ async def lifespan(app: FastAPI):
     # Initialize database
     init_database()
     # seed_database()
+
     yield
 
 
@@ -75,6 +76,9 @@ app.include_router(m2m.router, prefix="/auth/m2m", tags=["auth"])
 app.include_router(
     organization_credentials.router, prefix="/org/credentials", tags=["org_credentials"]
 )
+
+# MCP routes
+app.include_router(mcp.router, prefix="/mcp", tags=["mcp"])
 # app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
 
 

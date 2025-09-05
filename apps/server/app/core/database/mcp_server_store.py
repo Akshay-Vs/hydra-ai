@@ -1,10 +1,12 @@
 from typing import Optional, List, Any
 from fastapi import HTTPException
-from sqlmodel import Session, except_, select, desc
-from cryptography.fernet import Fernet
+from sqlmodel import Session, select, desc
 
 from app.models.sql_model import MCPServer
-from app.config.settings import settings
+from app.utils.logging import create_logger
+from app.utils.cipher_key import encrypt
+
+logger = create_logger(__name__)
 
 
 class MCPServerStore:
@@ -12,23 +14,6 @@ class MCPServerStore:
 
     def __init__(self, db_session: Session):
         self.db = db_session
-
-        if not settings.encryption_key:
-            raise ValueError("Encryption key is not set in settings.")
-
-        self.cipher = Fernet(settings.encryption_key)
-
-    def _with_decrypt(self, result: MCPServer | None) -> Optional[MCPServer]:
-        """Decrypt the auth_token of an MCPServer instance"""
-        if not result:
-            return None
-
-        auth_token = result.auth_token if result else None
-        if not auth_token:
-            return result
-
-        result.auth_token = self.cipher.decrypt(auth_token)
-        return result
 
     def create_mcp_server(
         self,
@@ -51,8 +36,7 @@ class MCPServerStore:
             Created MCPServer object
         """
         try:
-            encrypted_key = self.cipher.encrypt(data.auth_token)
-            data.auth_token = encrypted_key
+            data.auth_token = encrypt(data.auth_token)
 
             self.db.add(data)
             self.db.commit()
@@ -72,7 +56,7 @@ class MCPServerStore:
         if not result:
             return None
 
-        return self._with_decrypt(result)
+        return result
 
     def get_mcp_server_by_name(self, name: str) -> Optional[MCPServer]:
         """Get MCP server by name"""
@@ -81,7 +65,7 @@ class MCPServerStore:
         if not result:
             return None
 
-        return self._with_decrypt(result)
+        return result
 
     def get_mcp_server_by_url(self, url: str) -> Optional[MCPServer]:
         """Get MCP server by URL"""
@@ -90,7 +74,7 @@ class MCPServerStore:
         if not result:
             return None
 
-        return self._with_decrypt(result)
+        return result
 
     def get_mcp_servers_by_organization(
         self,
@@ -118,9 +102,7 @@ class MCPServerStore:
 
         statement = statement.order_by(desc(MCPServer.created_at)).limit(limit)
         results = list(self.db.exec(statement).all())
-        if not results:
-            return []
-        return [self._with_decrypt(result) for result in results]
+        return [result for result in results]
 
     def update_mcp_server(
         self,
@@ -143,7 +125,7 @@ class MCPServerStore:
 
         for key, value in kwargs.items():
             if key == "auth_token" and value is not None:
-                encrypted_key = self.cipher.encrypt(value.encode())
+                encrypted_key = encrypt(value)
                 setattr(server, key, encrypted_key)
             elif hasattr(server, key) and value is not None:
                 setattr(server, key, value)
@@ -189,7 +171,7 @@ class MCPServerStore:
         """
         server = self.get_mcp_server(server_id)
         if not server:
-            return False
+            raise HTTPException(status_code=404, detail="Server not found")
 
         self.db.delete(server)
         self.db.commit()

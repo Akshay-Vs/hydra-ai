@@ -36,3 +36,9 @@ class ServerConnection(BaseModel):
     error_message: Optional[str] = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+class ToolExecute(BaseModel):
+    server_name: str
+    name: str
+    args: Dict[str, Any]

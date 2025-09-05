@@ -1,7 +1,12 @@
 from fastmcp.client import BearerAuth, Client
 from fastmcp.client.transports import StreamableHttpTransport
 
-from app.core.types.mcp import MCPServerConfig, ServerConnection, ServerStatus
+from app.core.types.mcp import (
+    MCPServerConfig,
+    ServerConnection,
+    ServerStatus,
+    ToolExecute,
+)
 from app.utils.logging import create_logger
 
 from typing import Any, Dict, List, Optional
@@ -87,7 +92,10 @@ class MCPClient:
             tools = await connection.client.list_tools()
             connection.tools = tools
             logger.info(f"Fetched {len(tools)} tools from server {server_name}")
-            return tools
+            return [
+                {**tools.model_dump(), "server_name": server_name} for tools in tools
+            ]
+
         except Exception as e:
             logger.error(f"Failed to fetch tools from server {server_name}: {e}")
             return None
@@ -108,7 +116,11 @@ class MCPClient:
             resources = await connection.client.list_resources()
             connection.resources = resources
             logger.info(f"Fetched {len(resources)} resources from server {server_name}")
-            return resources
+            return [
+                {**resources.model_dump(), "server_name": server_name}
+                for resources in resources
+            ]
+
         except Exception as e:
             logger.error(f"Failed to fetch resources from server {server_name}: {e}")
             return None
@@ -129,7 +141,11 @@ class MCPClient:
             prompts = await connection.client.list_prompts()
             connection.prompts = prompts
             logger.info(f"Fetched {len(prompts)} prompts from server {server_name}")
-            return prompts
+            return [
+                {**prompts.model_dump(), "server_name": server_name}
+                for prompts in prompts
+            ]
+
         except Exception as e:
             logger.error(f"Failed to fetch prompts from server {server_name}: {e}")
             return None
@@ -172,3 +188,50 @@ class MCPClient:
             return None
 
         return connection.client
+
+    async def get_servers_names(self) -> List[str]:
+        """Get all connected servers"""
+        logger.debug(f"Getting all connected servers from {self.servers}")
+        return list(self.servers.keys())
+
+    async def ping_server(self, server_name: str) -> bool:
+        """Ping an MCP server"""
+        if server_name not in self.servers:
+            logger.error(f"Server {server_name} not found")
+            return False
+
+        connection = self.servers[server_name]
+
+        if connection.status != ServerStatus.CONNECTED:
+            logger.error(f"Server {server_name} is not connected")
+            return False
+
+        try:
+            await connection.client.ping()
+            logger.info(f"Pinged server {server_name}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to ping server {server_name}: {e}")
+            return False
+
+    async def execute_tool(self, tool: ToolExecute) -> bool:
+        """Execute a tool on an MCP server"""
+        if tool.server_name not in self.servers:
+            logger.error(f"Server {tool.server_name} not found")
+            return False
+
+        connection = self.servers[tool.server_name]
+
+        if connection.status != ServerStatus.CONNECTED:
+            logger.error(f"Server {tool.server_name} is not connected")
+            return False
+
+        try:
+            await connection.client.call_tool(tool.name, tool.args)
+            logger.info(f"Executed tool {tool.name} on server {tool.server_name}")
+            return True
+        except Exception as e:
+            logger.error(
+                f"Failed to execute tool {tool.name} on server {tool.server_name}: {e}"
+            )
+            return False

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlmodel import SQLModel, Session
 
 from app.core.database.mcp_server_store import MCPServerStore
@@ -25,7 +26,7 @@ class ServerCreateRequest(SQLModel):
 
 
 @router.get("/{org_id}")
-def get_servers(
+async def get_servers(
     org_id: str,
     user: User = Depends(get_current_user),
     session: Session = Depends(get_db_session),
@@ -57,7 +58,6 @@ def get_servers(
                 "url": server.url,
                 "icon": server.icon,
                 "is_active": server.is_active,
-                "auth_token": server.auth_token.decode()[:4],
                 "organization_id": server.organization_id,
                 "created_at": server.created_at,
                 "updated_at": server.updated_at,
@@ -120,4 +120,44 @@ def create_server(
 
     except Exception as e:
         logger.error(f"Error in create_server: {e}")
+        raise e
+
+
+@router.delete("/{org_id}/{server_name}")
+def delete_server(
+    org_id: str,
+    server_name: str,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_db_session),
+):
+    try:
+        logger.debug(
+            f"Received delete server request for org_id: {org_id} by user: {user.id}"
+        )
+        membership = ensure_org_membership(session, org_id, user)
+
+        logger.debug(f"User {user.id} is a member of organization {org_id}")
+        ensure_org_permissions(
+            session,
+            membership,
+            required_permissions=[Permissions.WRITE],
+        )
+
+        logger.debug(f"User {user.id} has WRITE permission for organization {org_id}")
+
+        mcp_store = MCPServerStore(session)
+        deleted_server = mcp_store.delete_mcp_server(server_name)
+        if deleted_server:
+            logger.debug(f"Deleted server {server_name} for organization {org_id}")
+            return JSONResponse(
+                content={"message": "Server deleted successfully"}, status_code=200
+            )
+
+        else:
+            logger.debug(
+                f"Server with id {server_name} for organization {org_id} not found"
+            )
+            raise HTTPException(status_code=500, detail="Failed to delete server")
+    except Exception as e:
+        logger.error(f"Error in delete_server: {e}")
         raise e

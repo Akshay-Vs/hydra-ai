@@ -2,6 +2,7 @@ import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime
 from fastapi import FastAPI
+from fastapi.exceptions import HTTPException
 from hydra_sdk import (
     HydraTelemetryClient,
     get_hydra_client,
@@ -18,9 +19,9 @@ app = FastAPI()
 # Setup telemetry configuration
 config = HydraConfig(
     service_name="my-fastapi-service",
-    batch_interval=30,  # Send every 30 seconds
+    batch_interval=5,  # Send every 30 seconds
     max_batch_size=100,
-    system_metrics_interval=90,  # Collect system metrics every 90 seconds
+    system_metrics_interval=10,  # Collect system metrics every 90 seconds
     timeout=30,
 )
 
@@ -116,27 +117,34 @@ async def list_users(limit: int = 10, offset: int = 0):
     client = get_hydra_client()
 
     if client:
-        # Use trace_span for the entire operation
-        async with client.trace_span(
-            "list_users", {"limit": limit, "offset": offset}
-        ) as (trace_id, span_id):
-            await client.log_info(f"Listing users with limit={limit}, offset={offset}")
+        try:
+            raise HTTPException(status_code=500, detail="Internal server error")
+            # Use trace_span for the entire operation
+            async with client.trace_span(
+                "list_users", {"limit": limit, "offset": offset}
+            ) as (trace_id, span_id):
+                await client.log_info(
+                    f"Listing users with limit={limit}, offset={offset}"
+                )
 
-            # Simulate database query
-            async with client.child_span("database_query") as (_, _):
-                await asyncio.sleep(0.2)
+                # Simulate database query
+                async with client.child_span("database_query") as (_, _):
+                    await asyncio.sleep(0.2)
 
-            users = [
-                {"user_id": i, "name": f"User {i}"}
-                for i in range(offset + 1, offset + limit + 1)
-            ]
+                users = [
+                    {"user_id": i, "name": f"User {i}"}
+                    for i in range(offset + 1, offset + limit + 1)
+                ]
 
-            await client.log_info(f"Retrieved {len(users)} users")
+                await client.log_info(f"Retrieved {len(users)} users")
 
-        if not users:
-            return
+            if not users:
+                return
 
-        return {"users": users, "total": 100, "limit": limit, "offset": offset}
+            return {"users": users, "total": 100, "limit": limit, "offset": offset}
+        except Exception as e:
+            await client.log_error("Error retrieving users", error=str(e))
+            raise
 
 
 @app.post("/api/users")

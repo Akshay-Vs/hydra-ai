@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This database schema is designed to support a platform managing users, organizations, agents, and operational data such as metrics, logs, and incidents. It provides a robust structure for handling user authentication, organizational hierarchies, agent operations, and system monitoring, ensuring data integrity and scalability through well-defined relationships.
+This database schema is designed to support the management of Hydra's users, organizations, agents, and operational data such as metrics, logs, and incidents.
 
 ## Schema Description
 

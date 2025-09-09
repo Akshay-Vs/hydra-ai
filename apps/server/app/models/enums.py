@@ -85,3 +85,10 @@ class GrantType(str, Enum):
     IMPLICIT = "implicit"
     PASSWORD = "password"
     CLIENT_CREDENTIALS = "client_credentials"
+
+
+class AggregationLevel(str, Enum):
+    MINUTE = "minute"
+    HOUR = "hour"
+    DAY = "day"
+    WEEK = "week"

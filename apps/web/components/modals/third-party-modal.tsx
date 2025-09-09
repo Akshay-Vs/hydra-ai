@@ -10,7 +10,7 @@ import { useMCPServerStore } from '@/store/mcp-server-store';
 import { useModalStore } from '@/store/modal-store';
 import { useOrgStore } from '@/store/org-store';
 import type { MCPServer } from '@/types/mcp-server';
-import LoadingSpinner from '../tokens/loading-spinner';
+import Spinner from '../tokens/spinner';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -138,7 +138,7 @@ const MCPConfigModal = () => {
             className="rounded-xl py-6 w-48"
             disabled={isPending}
           >
-            {isPending ? <LoadingSpinner /> : 'Create MCP Config'}
+            {isPending ? <Spinner /> : 'Create MCP Config'}
           </Button>
         </div>
       </form>

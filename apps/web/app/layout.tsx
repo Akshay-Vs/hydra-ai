@@ -7,6 +7,7 @@ import '@/styles/tailwind.css';
 import '@hydra/ui/styles.css';
 
 import { Providers } from '@/components/wrappers/providers';
+import ToasterProvider from '@/components/wrappers/toaster_provider';
 import { firaMono, inter } from './(global)/fonts';
 import { HydraMetadata, HydraViewport } from './(global)/metadata';
 
@@ -25,6 +26,7 @@ export default function RootLayout({
           className={`${inter.variable} ${firaMono.variable} antialiased bg-background-dark dark:text-text-dark`}
         >
           <Providers>{children}</Providers>
+          <ToasterProvider />
         </body>
       </html>
     </ClerkProvider>

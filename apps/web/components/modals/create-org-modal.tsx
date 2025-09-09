@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { useMutate } from '@/hooks/use-mutate';
 import { useModalStore } from '@/store/modal-store';
 import type { Organization } from '@/types/org';
-import LoadingSpinner from '../tokens/loading-spinner';
+import Spinner from '../tokens/spinner';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Organization name is required'),
@@ -92,7 +92,7 @@ const CreateOrgModal = () => {
             className="rounded-xl py-6 w-48"
             disabled={isPending}
           >
-            {isPending ? <LoadingSpinner /> : 'Create Organization'}
+            {isPending ? <Spinner /> : 'Create Organization'}
           </Button>
         </div>
       </form>

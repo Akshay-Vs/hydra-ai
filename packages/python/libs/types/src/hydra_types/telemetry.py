@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 
-# Telemetry Models (from your specification)
 class Metric(BaseModel):
     timestamp: datetime
     service_name: str

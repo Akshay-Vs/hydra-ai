@@ -16,8 +16,10 @@ const Credentials = () => {
 
   return (
     <Block className="full col min-h-[48dvh] !justify-start items-start relative">
-      <div className="flex w-full justify-between items-center pb-4">
-        <h1 className="px-2 text-2xl">Client Connection Credentials</h1>
+      <div className="flex w-full justify-between pb-4">
+        <h1 className="px-2 text-xl text-dull-dark font-medium p-2">
+          Client Connection Credentials
+        </h1>
         <NewCredentialButton />
       </div>
       <div className="full center">

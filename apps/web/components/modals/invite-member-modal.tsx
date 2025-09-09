@@ -5,7 +5,7 @@ import { Input } from '@hydra/ui/input';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
 import { useMutate } from '@/hooks/use-mutate';
-import LoadingSpinner from '../tokens/loading-spinner';
+import Spinner from '../tokens/spinner';
 
 const formSchema = z.object({
   recipient_email: z.string(),
@@ -93,7 +93,7 @@ const InviteMemberModal = () => {
             className="rounded-xl py-6 w-48"
             disabled={isPending}
           >
-            {isPending ? <LoadingSpinner /> : 'Send Invitation'}
+            {isPending ? <Spinner /> : 'Send Invitation'}
           </Button>
         </div>
       </form>

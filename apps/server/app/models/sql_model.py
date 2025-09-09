@@ -1,6 +1,16 @@
 from datetime import datetime
-from operator import index
-from sqlmodel import JSON, Column, Index, SQLModel, Field, Relationship, String, Text
+from sqlmodel import (
+    JSON,
+    BigInteger,
+    Column,
+    Double,
+    Index,
+    SQLModel,
+    Field,
+    Relationship,
+    String,
+    Text,
+)
 from typing import Any, Dict, List, Optional
 from cuid import cuid
 
@@ -92,6 +102,18 @@ class Organization(SQLModel, table=True):
     logs: List["Log"] = Relationship(back_populates="organization")
     agent_memories: List["AgentMemory"] = Relationship(back_populates="organization")
     execution_logs: List["AgentExecutionLog"] = Relationship(
+        back_populates="organization"
+    )
+    metric_aggregations_1m: List["MetricAggregation1m"] = Relationship(
+        back_populates="organization"
+    )
+    metric_aggregations_1h: List["MetricAggregation1h"] = Relationship(
+        back_populates="organization"
+    )
+    log_aggregations_1m: List["LogAggregation1m"] = Relationship(
+        back_populates="organization"
+    )
+    incident_aggregations_1h: List["IncidentAggregation1h"] = Relationship(
         back_populates="organization"
     )
     mcp_servers: List["MCPServer"] = Relationship(back_populates="organization")
@@ -527,6 +549,177 @@ class AgentExecutionLog(SQLModel, table=True):
     agent: Optional["Agent"] = Relationship(back_populates="execution_logs")
     organization: Optional["Organization"] = Relationship(
         back_populates="execution_logs"
+    )
+
+
+###########################################################################
+############################### Aggregated Data ###########################
+###########################################################################
+
+
+class MetricAggregation1m(SQLModel, table=True):
+    """
+    Aggregated metrics (1-minute resolution).
+    Pre-aggregated for analytics and anomaly detection.
+    """
+
+    __tablename__ = "metric_aggregations_1m"  # type: ignore
+    __table_args__ = (
+        Index("idx_service_time", "service_name", "timestamp"),
+        Index("idx_metric_time", "metric_name", "timestamp"),
+        {"comment": "SET TIFLASH REPLICA 1"},
+    )
+
+    # Composite primary key
+    timestamp: datetime = Field(primary_key=True, index=True)
+    service_name: str = Field(max_length=128, primary_key=True, index=True)
+    metric_name: str = Field(max_length=64, primary_key=True, index=True)
+
+    # Aggregation values
+    avg_value: float = Field(sa_column=Column(Double, nullable=False))
+    min_value: float = Field(sa_column=Column(Double, nullable=False))
+    max_value: float = Field(sa_column=Column(Double, nullable=False))
+    count_values: int = Field(sa_column=Column(BigInteger, nullable=False))
+    sum_values: float = Field(sa_column=Column(Double, nullable=False))
+
+    # Percentiles
+    p50_value: Optional[float] = Field(default=None, sa_column=Column(Double))
+    p95_value: Optional[float] = Field(default=None, sa_column=Column(Double))
+    p99_value: Optional[float] = Field(default=None, sa_column=Column(Double))
+
+    # Statistical
+    stddev_value: Optional[float] = Field(default=None, sa_column=Column(Double))
+
+    # Metadata
+    created_at: datetime = Field(default_factory=now, nullable=False)
+
+    organization_id: str = Field(default=None, foreign_key="organizations.id")
+
+    # Relationships
+    organization: Optional["Organization"] = Relationship(
+        back_populates="metric_aggregations_1m"
+    )
+
+
+# Metric Aggregations (1h)
+class MetricAggregation1h(SQLModel, table=True):
+    """
+    Aggregated metrics (1-hour resolution).
+    """
+
+    __tablename__ = "metric_aggregations_1h"  # type: ignore
+    __table_args__ = (
+        Index("idx_service_time", "service_name", "timestamp"),
+        {"comment": "SET TIFLASH REPLICA 1"},
+    )
+
+    # Composite primary key
+    timestamp: datetime = Field(primary_key=True, index=True)
+    service_name: str = Field(max_length=128, primary_key=True, index=True)
+    metric_name: str = Field(max_length=64, primary_key=True, index=True)
+
+    # Aggregates
+    avg_value: float = Field(sa_column=Column(Double, nullable=False))
+    min_value: float = Field(sa_column=Column(Double, nullable=False))
+    max_value: float = Field(sa_column=Column(Double, nullable=False))
+    count_values: int = Field(sa_column=Column(BigInteger, nullable=False))
+    sum_values: float = Field(sa_column=Column(Double, nullable=False))
+
+    # Percentiles
+    p95_value: Optional[float] = Field(default=None, sa_column=Column(Double))
+    p99_value: Optional[float] = Field(default=None, sa_column=Column(Double))
+
+    # Org relation
+    organization_id: str = Field(foreign_key="organizations.id", index=True)
+
+    # Metadata
+    created_at: datetime = Field(default_factory=now, nullable=False)
+
+    # Relationship
+    organization: Optional["Organization"] = Relationship(
+        back_populates="metric_aggregations_1h"
+    )
+
+
+# Log Aggregations (1m)
+class LogAggregation1m(SQLModel, table=True):
+    """
+    Log aggregations (1-minute resolution).
+    """
+
+    __tablename__ = "log_aggregations_1m"  # type: ignore
+    __table_args__ = (
+        Index("idx_service_time", "service_name", "timestamp"),
+        Index("idx_error_rate", "error_rate"),
+        {"comment": "SET TIFLASH REPLICA 1"},
+    )
+
+    # Composite primary key
+    timestamp: datetime = Field(primary_key=True, index=True)
+    service_name: str = Field(max_length=128, primary_key=True, index=True)
+
+    # Counts
+    total_logs: int = Field(sa_column=Column(BigInteger, nullable=False))
+    error_count: int = Field(default=0, sa_column=Column(BigInteger))
+    warn_count: int = Field(default=0, sa_column=Column(BigInteger))
+    info_count: int = Field(default=0, sa_column=Column(BigInteger))
+    debug_count: int = Field(default=0, sa_column=Column(BigInteger))
+
+    # Rates
+    error_rate: float = Field(default=0.0, sa_column=Column(Double))
+
+    # Traces
+    unique_traces: int = Field(default=0, sa_column=Column(BigInteger))
+
+    # Org relation
+    organization_id: str = Field(foreign_key="organizations.id", index=True)
+
+    # Metadata
+    created_at: datetime = Field(default_factory=now, nullable=False)
+
+    # Relationship
+    organization: Optional["Organization"] = Relationship(
+        back_populates="log_aggregations_1m"
+    )
+
+
+# Incident Aggregations (1h)
+class IncidentAggregation1h(SQLModel, table=True):
+    """
+    Incident aggregations (1-hour resolution).
+    """
+
+    __tablename__ = "incident_aggregations_1h"  # type: ignore
+    __table_args__ = (
+        Index("idx_service_time", "service_name", "timestamp"),
+        Index("idx_resolution_time", "avg_resolution_time"),
+        {"comment": "SET TIFLASH REPLICA 1"},
+    )
+
+    # Composite primary key
+    timestamp: datetime = Field(primary_key=True, index=True)
+    service_name: str = Field(max_length=128, primary_key=True, index=True)
+
+    # Counts
+    total_incidents: int = Field(sa_column=Column(BigInteger, nullable=False))
+    critical_incidents: int = Field(default=0, sa_column=Column(BigInteger))
+    high_incidents: int = Field(default=0, sa_column=Column(BigInteger))
+    medium_incidents: int = Field(default=0, sa_column=Column(BigInteger))
+    low_incidents: int = Field(default=0, sa_column=Column(BigInteger))
+
+    # Metrics
+    avg_resolution_time: Optional[float] = Field(default=None, sa_column=Column(Double))
+    auto_resolved_count: int = Field(default=0, sa_column=Column(BigInteger))
+
+    # Org relation
+    organization_id: str = Field(foreign_key="organizations.id", index=True)
+
+    # Metadata
+    created_at: datetime = Field(default_factory=now, nullable=False)
+
+    # Relationship
+    organization: Optional["Organization"] = Relationship(
+        back_populates="incident_aggregations_1h"
     )
 
 

@@ -8,8 +8,9 @@ from hydra_types.telemetry import Trace
 class TraceContextManager:
     """Manages distributed tracing context and span creation"""
 
-    def __init__(self, service_name: str):
+    def __init__(self, service_name: str, service_version: str):
         self.service_name = service_name
+        self.service_version = service_version
         self._current_trace_id: Optional[str] = None
         self._current_span_id: Optional[str] = None
         self._trace_callback: Optional[Callable[[Trace], Awaitable[None]]] = None
@@ -82,6 +83,7 @@ class TraceContextManager:
                 status=status,
                 attributes=error_attributes if error_attributes else None,
                 service_name=self.service_name,
+                service_version=self.service_version,
             )
 
             if self._trace_callback:
@@ -141,6 +143,7 @@ class TraceContextManager:
                 status=status,
                 attributes=error_attributes if error_attributes else None,
                 service_name=self.service_name,
+                service_version=self.service_version,
             )
 
             if self._trace_callback:

@@ -21,15 +21,19 @@ class HydraTelemetryClient:
         # Initialize components
         self._batch_sender = BatchSender(config)
         self._system_metrics = SystemMetricsCollector(
-            config.service_name, config.system_metrics_interval
+            config.service_name, config.service_version, config.system_metrics_interval
         )
-        self._trace_manager = TraceContextManager(config.service_name)
+        self._trace_manager = TraceContextManager(
+            config.service_name, config.service_version
+        )
 
         # Initialize logging helper
         if use_contextual_logging:
-            self._log_helper = ContextualLogHelper(config.service_name)
+            self._log_helper = ContextualLogHelper(
+                config.service_name, config.service_version
+            )
         else:
-            self._log_helper = LogHelper(config.service_name)
+            self._log_helper = LogHelper(config.service_name, config.service_version)
 
         # Wire up callbacks
         self._setup_callbacks()

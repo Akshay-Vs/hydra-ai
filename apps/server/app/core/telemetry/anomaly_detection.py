@@ -48,7 +48,10 @@ class TelemetryAnomalyDetector:
             self._compute_historic_stats(historic_incidents, "incidents")
 
         if not all_features:
-            raise ValueError("No historic data provided")
+            logger.warning(
+                "Cannot train anomaly detector, No historic data is available"
+            )
+            return
 
         self.feature_names = list(all_features[0].keys())
         data_matrix = self._features_to_matrix(all_features)
@@ -98,9 +101,11 @@ class TelemetryAnomalyDetector:
         self, live_telemetry_batch: TelemetryBatch
     ) -> List[Dict[str, Any]]:
         if not self.is_trained:
-            raise ValueError("Model must be trained first!")
+            logger.warning("Skipping anomaly detection, Model must be trained first!")
+            return []
         if not live_telemetry_batch:
-            raise ValueError("Telemetry batch is required")
+            logger.warning("Skipping anomaly detection, Telemetry batch is required")
+            return []
 
         logger.info("Analyzing telemetry batch for anomalies...")
         results = []
@@ -167,9 +172,11 @@ class TelemetryAnomalyDetector:
 
                 start_times = [trace.start_time for trace in http_traces]
                 time_window_ms = (
-                    max(start_times) - min(start_times) if start_times else 1
+                    max(start_times) - min(start_times)
+                    if start_times
+                    else timedelta(milliseconds=1)
                 )
-                time_window_min = max(time_window_ms / (1000 * 60), 0.0167)
+                time_window_min = max(time_window_ms.total_seconds() / 60, 0.0167)
                 request_rate = total_http_requests / time_window_min
 
                 durations = [

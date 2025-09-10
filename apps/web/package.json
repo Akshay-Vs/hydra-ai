@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@clerk/elements": "^0.23.54",
-    "@clerk/nextjs": "^6.31.1",
+    "@clerk/nextjs": "^6.31.10",
     "@hookform/resolvers": "^5.2.1",
     "@hydra/ui": "workspace:*",
     "@next/eslint-plugin-next": "^15.4.4",

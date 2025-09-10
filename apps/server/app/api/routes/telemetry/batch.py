@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import json
 from fastapi import APIRouter, Depends
 
 from hydra_types.telemetry import TelemetryBatch
@@ -8,13 +7,12 @@ from app.core.auth.m2m_auth import get_current_client
 from app.core.helpers.telemetry_data_processor import TelemetryDataProcessor
 from app.core.types.auth_type import SessionClient
 from app.services.database_service import get_db_session
+from app.services.telemetry_service import TelemetryService
 from app.utils.logging import create_logger
 from app.core.database.aggregate_reader import AggregateReader
 from app.core.telemetry.anomaly_detection import TelemetryAnomalyDetector
-from app.core.types.aggregate_telemetry import (
-    MetricAggregationData,
-)
-from hydra_types.telemetry import TelemetryBatch
+
+from app.utils.threads import fire_and_forget
 
 router = APIRouter()
 logger = create_logger(__name__)
@@ -33,6 +31,9 @@ def receive_batch(
     logger.debug(f"Received: {batch.model_dump_json(indent=2)}")
 
     telemetry_processor = TelemetryDataProcessor(session)
+
+    telemetry_service = TelemetryService(session)
+    telemetry_service.auto_aggregate(client.organization_id)
 
     if not client.organization_id:
         logger.error("Client does not have an associated organization_id")

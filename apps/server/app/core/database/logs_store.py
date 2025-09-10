@@ -2,9 +2,8 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 from sqlmodel import Session, select, desc
 
-from app.models.enums import LogLevelEnum
 from app.models.sql_model import Log
-from hydra_types.telemetry import Log as LogType
+from hydra_types.telemetry import Log as LogType, LogLevelEnum
 
 
 class LogStore:

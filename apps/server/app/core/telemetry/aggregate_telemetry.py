@@ -42,6 +42,7 @@ class AggregateTelemetry:
         sql = f"""
           SELECT
             service_name,
+            service_version,
             metric_name,
             {self._time_bucket_sql(granularity)} as time_bucket,
             AVG(value)     AS avg_value,
@@ -60,10 +61,12 @@ class AggregateTelemetry:
               AND organization_id = :org_id
           GROUP BY
               service_name,
+              service_version,
               metric_name,
               time_bucket
           ORDER BY
               service_name,
+              service_version,
               metric_name,
               time_bucket
           LIMIT 500;
@@ -83,6 +86,7 @@ class AggregateTelemetry:
                 agg = MetricAggregation(
                     timestamp=row.time_bucket,
                     service_name=row.service_name,
+                    service_version=row.service_version,
                     metric_name=row.metric_name,
                     avg_value=float(row.avg_value),
                     min_value=float(row.min_value),
@@ -118,6 +122,7 @@ class AggregateTelemetry:
         SELECT
             {self._time_bucket_sql(granularity)} as timebucket,
             service_name,
+            service_version,
             COUNT(*) as total_logs,
             COUNT(CASE WHEN level = 'ERROR' THEN 1 END) as error_count,
             COUNT(CASE WHEN level = 'WARN' THEN 1 END) as warn_count,
@@ -131,8 +136,12 @@ class AggregateTelemetry:
             AND organization_id = :org_id
         GROUP BY
             timebucket,
-            service_name
-        ORDER BY timebucket, service_name
+            service_name,
+            service_version
+        ORDER BY
+            timebucket,
+            service_name,
+            service_version
         """
 
         try:
@@ -150,6 +159,7 @@ class AggregateTelemetry:
                 agg = LogAggregation(
                     timestamp=row.timebucket,
                     service_name=row.service_name,
+                    service_version=row.service_version,
                     total_logs=int(row.total_logs),
                     error_count=int(row.error_count),
                     warn_count=int(row.warn_count),
@@ -182,6 +192,7 @@ class AggregateTelemetry:
         SELECT
             {self._time_bucket_sql(granularity)} as time_bucket,
             service_name,
+            service_version,
             COUNT(*) as total_incidents,
             COUNT(CASE WHEN severity = 'CRITICAL' THEN 1 END) as critical_incidents,
             COUNT(CASE WHEN severity = 'HIGH' THEN 1 END) as high_incidents,
@@ -195,8 +206,11 @@ class AggregateTelemetry:
             AND organization_id = :org_id
         GROUP BY
             time_bucket,
+            service_name,
+            service_version
+        ORDER BY
+            time_bucket,
             service_name
-        ORDER BY time_bucket, service_name
         """
 
         try:

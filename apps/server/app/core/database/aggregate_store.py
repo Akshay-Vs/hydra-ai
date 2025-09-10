@@ -3,7 +3,7 @@ from typing import List
 
 from sqlmodel import delete
 
-from app.core.telemetry.telemetry_aggregator import (
+from app.core.types.aggregate_telemetry import (
     AggregationGranularity,
     IncidentAggregation,
     LogAggregation,
@@ -52,6 +52,7 @@ class AggregateStore:
             instance_data = {
                 "timestamp": agg.timestamp,
                 "service_name": agg.service_name,
+                "service_version": agg.service_version,
                 "metric_name": agg.metric_name,
                 "avg_value": agg.avg_value,
                 "min_value": agg.min_value,
@@ -111,6 +112,7 @@ class AggregateStore:
             instance_data = {
                 "timestamp": agg.timestamp,
                 "service_name": agg.service_name,
+                "service_version": agg.service_version,
                 "total_logs": agg.total_logs,
                 "error_count": getattr(agg, "error_count", 0),
                 "warn_count": getattr(agg, "warn_count", 0),

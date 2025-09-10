@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from pydantic import BaseModel
 from enum import Enum
-from hydra_types.telemetry import Event, Incident, Log, Metric, Trace
 
 
 # Summary and analytics models
@@ -39,6 +38,7 @@ class ServiceIncidentTrend(BaseModel):
 class MetricAggregation(BaseModel):
     timestamp: datetime
     service_name: str
+    service_version: str
     metric_name: str
     avg_value: float
     min_value: float
@@ -54,6 +54,7 @@ class MetricAggregation(BaseModel):
 class LogAggregation(BaseModel):
     timestamp: datetime
     service_name: str
+    service_version: str
     total_logs: int
     error_count: int
     warn_count: int
@@ -87,6 +88,7 @@ class MetricAggregationData(BaseModel):
 
     timestamp: datetime
     service_name: str
+    service_version: str
     metric_name: str
     avg_value: float
     min_value: float

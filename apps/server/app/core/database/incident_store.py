@@ -15,6 +15,7 @@ class IncidentStore:
     def create_incident(
         self,
         incident: Incident,
+        organization_id: str,
     ) -> Incident:
         """
         Create a new incident
@@ -37,9 +38,10 @@ class IncidentStore:
         """
         incident = Incident(
             service_name=incident.service_name,
+            service_version=incident.service_version,
             severity=incident.severity,
             title=incident.title,
-            organization_id=incident.organization_id,
+            organization_id=organization_id,
             description=incident.description,
             error_signature=incident.error_signature,
             embedding=incident.embedding,

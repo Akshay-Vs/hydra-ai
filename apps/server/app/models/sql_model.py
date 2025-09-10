@@ -18,7 +18,6 @@ from app.models.enums import (
     AgentStatus,
     ExecutionStage,
     InvitationStatus,
-    LogLevelEnum,
     MembershipStatus,
     MemoryType,
     Permissions,
@@ -27,6 +26,7 @@ from app.models.enums import (
     StatusEnum,
 )
 from app.models.mixins import TimestampMixin
+from hydra_types.telemetry import LogLevelEnum
 
 
 def now():
@@ -330,6 +330,7 @@ class Metric(SQLModel, table=True):
     metric_id: str = Field(default_factory=cuid, primary_key=True)
     timestamp: datetime = Field(default_factory=now(), index=True)
     service_name: str = Field(max_length=128, index=True)
+    service_version: str = Field(max_length=128, index=True)
     metric_name: str = Field(max_length=64)
     value: float
     labels: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
@@ -360,6 +361,7 @@ class Log(SQLModel, table=True):
     log_id: str = Field(default_factory=cuid, primary_key=True)
     timestamp: datetime = Field(default_factory=now(), index=True)
     service_name: str = Field(max_length=128, index=True)
+    service_version: str = Field(max_length=128, index=True)
     level: LogLevelEnum
     message: str = Field(sa_column=Column(Text))
     trace_id: Optional[str] = Field(default=None, max_length=64)
@@ -395,6 +397,7 @@ class Incident(SQLModel, table=True):
     incident_id: str = Field(primary_key=True, default_factory=cuid)
     timestamp: datetime = Field(default_factory=now(), index=True)
     service_name: str = Field(max_length=128, index=True)
+    service_version: str = Field(max_length=128, index=True)
     severity: SeverityEnum
     status: StatusEnum = Field(default=StatusEnum.OPEN)
     title: str = Field(max_length=512)
@@ -487,6 +490,7 @@ class Trace(SQLModel, table=True):
     attributes: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     events: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
     service_name: str = Field(max_length=128)
+    service_version: str = Field(max_length=128)
     organization_id: str = Field(foreign_key="organizations.id")
 
     # Relationships
@@ -573,6 +577,7 @@ class MetricAggregation1m(SQLModel, table=True):
     # Composite primary key
     timestamp: datetime = Field(primary_key=True, index=True)
     service_name: str = Field(max_length=128, primary_key=True, index=True)
+    service_version: str = Field(max_length=128, index=True)
     metric_name: str = Field(max_length=64, primary_key=True, index=True)
 
     # Aggregation values
@@ -616,6 +621,7 @@ class MetricAggregation1h(SQLModel, table=True):
     # Composite primary key
     timestamp: datetime = Field(primary_key=True, index=True)
     service_name: str = Field(max_length=128, primary_key=True, index=True)
+    service_version: str = Field(max_length=128, index=True)
     metric_name: str = Field(max_length=64, primary_key=True, index=True)
 
     # Aggregates
@@ -657,6 +663,7 @@ class LogAggregation1m(SQLModel, table=True):
     # Composite primary key
     timestamp: datetime = Field(primary_key=True, index=True)
     service_name: str = Field(max_length=128, primary_key=True, index=True)
+    service_version: str = Field(max_length=128, index=True)
 
     # Counts
     total_logs: int = Field(sa_column=Column(BigInteger, nullable=False))
@@ -699,6 +706,7 @@ class IncidentAggregation1h(SQLModel, table=True):
     # Composite primary key
     timestamp: datetime = Field(primary_key=True, index=True)
     service_name: str = Field(max_length=128, primary_key=True, index=True)
+    service_version: str = Field(max_length=128, index=True)
 
     # Counts
     total_incidents: int = Field(sa_column=Column(BigInteger, nullable=False))

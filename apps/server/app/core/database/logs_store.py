@@ -4,6 +4,7 @@ from sqlmodel import Session, select, desc
 
 from app.models.enums import LogLevelEnum
 from app.models.sql_model import Log
+from hydra_types.telemetry import Log as LogType
 
 
 class LogStore:
@@ -15,6 +16,7 @@ class LogStore:
     def create_log(
         self,
         service_name: str,
+        service_version: str,
         level: LogLevelEnum,
         message: str,
         organization_id: str,
@@ -43,6 +45,7 @@ class LogStore:
         """
         log = Log(
             service_name=service_name,
+            service_version=service_version,
             level=level,
             message=message,
             organization_id=organization_id,
@@ -57,7 +60,9 @@ class LogStore:
         self.db.refresh(log)
         return log
 
-    def bulk_create_logs(self, logs_data: List[Dict]) -> List[Log]:
+    def bulk_create_logs(
+        self, logs_data: List[LogType], organization_id: str
+    ) -> List[Log]:
         """
         Bulk create multiple logs
 
@@ -67,7 +72,20 @@ class LogStore:
         Returns:
             List of created Log objects
         """
-        logs = [Log(**data) for data in logs_data]
+        logs = [
+            Log(
+                service_name=data.service_name,
+                service_version=data.service_version,
+                level=data.level,
+                message=data.message,
+                trace_id=data.trace_id,
+                span_id=data.span_id,
+                structured_data=data.structured_data,
+                timestamp=data.timestamp,
+                organization_id=organization_id,
+            )
+            for data in logs_data
+        ]
         self.db.add_all(logs)
         self.db.commit()
         for log in logs:

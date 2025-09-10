@@ -1,6 +1,5 @@
 from datetime import datetime
 from sqlmodel import (
-    BIGINT,
     JSON,
     BigInteger,
     Column,
@@ -118,6 +117,9 @@ class Organization(SQLModel, table=True):
         back_populates="organization"
     )
     mcp_servers: List["MCPServer"] = Relationship(back_populates="organization")
+    aggregation_checkpoint: List["AggregationCheckpoint"] = Relationship(
+        back_populates="organization"
+    )
 
 
 class OrganizationMember(SQLModel, table=True):
@@ -729,6 +731,20 @@ class IncidentAggregation1h(SQLModel, table=True):
     # Relationship
     organization: Optional["Organization"] = Relationship(
         back_populates="incident_aggregations_1h"
+    )
+
+
+class AggregationCheckpoint(SQLModel, table=True):
+    __tablename__ = "aggregation_checkpoint"  # type: ignore
+
+    id: str = Field(default_factory=cuid, primary_key=True)
+    organization_id: str = Field(foreign_key="organizations.id", index=True)
+    field_name: str = Field(index=True)
+    aggrigated_at: datetime = Field(default_factory=now)
+
+    # Relationships
+    organization: Optional["Organization"] = Relationship(
+        back_populates="aggregation_checkpoint"
     )
 
 

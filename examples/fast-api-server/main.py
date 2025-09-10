@@ -19,6 +19,7 @@ app = FastAPI()
 # Setup telemetry configuration
 config = HydraConfig(
     service_name="my-fastapi-service",
+    service_version="1.0.0",
     batch_interval=5,  # Send every 30 seconds
     max_batch_size=100,
     system_metrics_interval=10,  # Collect system metrics every 90 seconds
@@ -91,6 +92,7 @@ async def get_user(user_id: int):
             metric = Metric(
                 timestamp=datetime.now(),
                 service_name=config.service_name,
+                service_version=config.service_version,
                 metric_name="api.users.requests",
                 value=1,
                 unit="count",
@@ -118,7 +120,6 @@ async def list_users(limit: int = 10, offset: int = 0):
 
     if client:
         try:
-            raise HTTPException(status_code=500, detail="Internal server error")
             # Use trace_span for the entire operation
             async with client.trace_span(
                 "list_users", {"limit": limit, "offset": offset}
@@ -179,6 +180,7 @@ async def create_user(user_data: dict):
             metric = Metric(
                 timestamp=datetime.now(),
                 service_name=config.service_name,
+                service_version=config.service_version,
                 metric_name="api.users.created",
                 value=1,
                 unit="count",

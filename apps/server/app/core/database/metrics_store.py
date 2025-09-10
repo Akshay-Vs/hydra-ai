@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlmodel import Session, select, desc
 
 from app.models.sql_model import Metric
+from hydra_types.telemetry import Metric as MetricType
 
 
 class MetricStore:
@@ -14,6 +15,7 @@ class MetricStore:
     def create_metric(
         self,
         service_name: str,
+        service_version: str,
         metric_name: str,
         value: float,
         organization_id: str,
@@ -40,6 +42,7 @@ class MetricStore:
         """
         metric = Metric(
             service_name=service_name,
+            service_version=service_version,
             metric_name=metric_name,
             value=value,
             organization_id=organization_id,
@@ -53,7 +56,9 @@ class MetricStore:
         self.db.refresh(metric)
         return metric
 
-    def bulk_create_metrics(self, metrics_data: List[Dict]) -> List[Metric]:
+    def bulk_create_metrics(
+        self, metrics_data: List[MetricType], organization_id: str
+    ) -> List[Metric]:
         """
         Bulk create multiple metrics
 
@@ -63,7 +68,19 @@ class MetricStore:
         Returns:
             List of created Metric objects
         """
-        metrics = [Metric(**data) for data in metrics_data]
+        metrics = [
+            Metric(
+                service_name=data.service_name,
+                metric_name=data.metric_name,
+                service_version=data.service_version,
+                value=data.value,
+                labels=data.labels,
+                unit=data.unit,
+                timestamp=data.timestamp,
+                organization_id=organization_id,
+            )
+            for data in metrics_data
+        ]
         self.db.add_all(metrics)
         self.db.commit()
         for metric in metrics:

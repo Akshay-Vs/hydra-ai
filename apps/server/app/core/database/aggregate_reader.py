@@ -62,7 +62,26 @@ class AggregateReader:
         statement = statement.order_by(target_model.timestamp).limit(limit)  # type: ignore
 
         retult = list(self.session.exec(statement).all())
-        return [MetricAggregationData(**row) for row in retult]
+        return [
+            MetricAggregationData(
+                organization_id=row.organization_id,
+                service_name=row.service_name,
+                service_version=row.service_version,
+                metric_name=row.metric_name,
+                avg_value=row.avg_value,
+                min_value=row.min_value,
+                max_value=row.max_value,
+                count_values=row.count_values,
+                sum_values=row.sum_values,
+                p50_value=row.p50_value,
+                p95_value=row.p95_value,
+                p99_value=row.p99_value,
+                stddev_value=row.stddev_value,
+                timestamp=row.timestamp,
+                created_at=row.created_at,
+            )
+            for row in retult
+        ]
 
     def get_aggregated_logs(
         self,

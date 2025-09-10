@@ -245,7 +245,7 @@ wheels = [
 
 [[package]]
 name = "hydra-sdk"
-version = "0.1.2"
+version = "0.1.4"
 source = { editable = "../../packages/python/libs/hydra_sdk" }
 dependencies = [
     { name = "dotenv" },
@@ -268,7 +268,7 @@ requires-dist = [
 
 [[package]]
 name = "hydra-types"
-version = "0.1.0"
+version = "0.1.3"
 source = { editable = "../../packages/python/libs/types" }
 dependencies = [
     { name = "pydantic" },

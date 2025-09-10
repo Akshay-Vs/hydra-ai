@@ -9,8 +9,11 @@ import psutil
 class SystemMetricsCollector:
     """Collects system and process metrics for telemetry"""
 
-    def __init__(self, service_name: str, metrics_interval: float = 60.0):
+    def __init__(
+        self, service_name: str, service_version: str, metrics_interval: float = 60.0
+    ):
         self.service_name = service_name
+        self.service_version = service_version
         self.metrics_interval = metrics_interval
         self.logger = logging.getLogger(__name__)
         self._process = psutil.Process()
@@ -147,10 +150,12 @@ class SystemMetricsCollector:
         metric = Metric(
             timestamp=timestamp,
             service_name=self.service_name,
+            service_version=self.service_version,
             metric_name=name,
             value=value,
             unit=unit,
         )
+        print(f"Sending metric: {metric.model_dump_json(indent=2)}")
         if self._metric_callback:
             await self._metric_callback(metric)
 

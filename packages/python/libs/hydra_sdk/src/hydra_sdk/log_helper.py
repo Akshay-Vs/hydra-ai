@@ -1,5 +1,6 @@
+from re import L
 from typing import Optional, Dict, Any, Callable, Awaitable
-from hydra_types.telemetry import Log
+from hydra_types.telemetry import Log, LogLevelEnum
 
 from hydra_sdk.utils import _now
 
@@ -7,8 +8,9 @@ from hydra_sdk.utils import _now
 class LogHelper:
     """Helper class for structured logging with trace context"""
 
-    def __init__(self, service_name: str):
+    def __init__(self, service_name: str, service_version: str):
         self.service_name = service_name
+        self.service_version = service_version
         self._log_callback: Optional[Callable[[Log], Awaitable[None]]] = None
         self._trace_context_provider: Optional[
             Callable[[], tuple[Optional[str], Optional[str]]]
@@ -26,30 +28,30 @@ class LogHelper:
 
     async def info(self, message: str, **kwargs):
         """Log an info message"""
-        await self._create_log("INFO", message, kwargs)
+        await self._create_log(LogLevelEnum.INFO, message, kwargs)
 
     async def error(self, message: str, **kwargs):
         """Log an error message"""
-        await self._create_log("ERROR", message, kwargs)
+        await self._create_log(LogLevelEnum.ERROR, message, kwargs)
 
     async def warning(self, message: str, **kwargs):
         """Log a warning message"""
-        await self._create_log("WARNING", message, kwargs)
+        await self._create_log(LogLevelEnum.WARN, message, kwargs)
 
     async def debug(self, message: str, **kwargs):
         """Log a debug message"""
-        await self._create_log("DEBUG", message, kwargs)
+        await self._create_log(LogLevelEnum.DEBUG, message, kwargs)
 
     async def critical(self, message: str, **kwargs):
         """Log a critical message"""
-        await self._create_log("CRITICAL", message, kwargs)
+        await self._create_log(LogLevelEnum.FATAL, message, kwargs)
 
-    async def log(self, level: str, message: str, **kwargs):
+    async def log(self, level: LogLevelEnum, message: str, **kwargs):
         """Log a message with specified level"""
         await self._create_log(level, message, kwargs)
 
     async def _create_log(
-        self, level: str, message: str, structured_data: Dict[str, Any]
+        self, level: LogLevelEnum, message: str, structured_data: Dict[str, Any]
     ):
         """Create and send a log entry"""
         if self._log_callback is None:
@@ -63,7 +65,8 @@ class LogHelper:
         log = Log(
             timestamp=_now(),
             service_name=self.service_name,
-            level=level.upper(),
+            service_version=self.service_version,
+            level=level,
             message=message,
             trace_id=trace_id,
             span_id=span_id,
@@ -76,8 +79,8 @@ class LogHelper:
 class ContextualLogHelper(LogHelper):
     """Log helper that includes additional context like user ID, request ID, etc."""
 
-    def __init__(self, service_name: str):
-        super().__init__(service_name)
+    def __init__(self, service_name: str, service_version: str):
+        super().__init__(service_name, service_version)
         self._context: Dict[str, Any] = {}
 
     def set_context(self, **context_data):
@@ -94,7 +97,7 @@ class ContextualLogHelper(LogHelper):
             self._context.pop(key, None)
 
     async def _create_log(
-        self, level: str, message: str, structured_data: Dict[str, Any]
+        self, level: LogLevelEnum, message: str, structured_data: Dict[str, Any]
     ):
         """Create and send a log entry with additional context"""
         # Merge context data with structured data

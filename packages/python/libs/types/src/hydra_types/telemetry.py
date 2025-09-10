@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
@@ -6,16 +7,26 @@ from typing import List, Dict, Any, Optional
 class Metric(BaseModel):
     timestamp: datetime
     service_name: str
+    service_version: str
     metric_name: str
     value: float
     labels: Optional[Dict[str, str]] = None
     unit: Optional[str] = None
 
 
+class LogLevelEnum(str, Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARN = "WARN"
+    ERROR = "ERROR"
+    FATAL = "FATAL"
+
+
 class Log(BaseModel):
     timestamp: datetime
     service_name: str
-    level: str
+    service_version: str
+    level: LogLevelEnum
     message: str
     trace_id: Optional[str] = None
     span_id: Optional[str] = None
@@ -33,13 +44,14 @@ class Trace(BaseModel):
     span_id: str
     parent_span_id: Optional[str] = None
     operation_name: str
-    start_time: int
-    end_time: Optional[int] = None
+    start_time: datetime
+    end_time: Optional[datetime] = None
     duration_ms: Optional[float] = None
     status: str
     attributes: Optional[Dict[str, Any]] = None
     events: Optional[List[TraceEvent]] = None
     service_name: str
+    service_version: str
 
 
 class Event(BaseModel):

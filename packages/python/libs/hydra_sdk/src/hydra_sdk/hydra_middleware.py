@@ -65,6 +65,7 @@ class HydraMiddleware(BaseHTTPMiddleware):
             status=status,
             attributes=attributes,
             service_name=self.hydra_client.config.service_name,
+            service_version=self.hydra_client.config.service_version,
         )
 
         await self.hydra_client.add_trace(trace)
@@ -76,6 +77,7 @@ class HydraMiddleware(BaseHTTPMiddleware):
             Metric(
                 timestamp=now,
                 service_name=self.hydra_client.config.service_name,
+                service_version=self.hydra_client.config.service_version,
                 metric_name="http.request.duration_ms",
                 value=duration_ms,
                 labels={
@@ -91,6 +93,7 @@ class HydraMiddleware(BaseHTTPMiddleware):
             Metric(
                 timestamp=now,
                 service_name=self.hydra_client.config.service_name,
+                service_version=self.hydra_client.config.service_version,
                 metric_name="http.request.count",
                 value=1,
                 labels={

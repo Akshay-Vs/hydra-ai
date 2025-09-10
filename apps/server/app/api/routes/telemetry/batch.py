@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 from fastapi import APIRouter, Depends
 
 from hydra_types.telemetry import TelemetryBatch
@@ -29,6 +30,7 @@ def receive_batch(
     Receive a batch of data for processing.
     """
     logger.debug(f"Authenticated as {client}")
+    logger.debug(f"Received: {batch.model_dump_json(indent=2)}")
 
     telemetry_processor = TelemetryDataProcessor(session)
 
@@ -39,7 +41,7 @@ def receive_batch(
             "message": "Client does not have an associated organization",
         }
 
-    telemetry_processor.process_telemetry_batch(batch, client.organization_id)
+    telemetry_processor.store_telemetries(batch, client.organization_id)
     getter = AggregateReader(session)
 
     historic_metrics = getter.get_aggregated_metrics(

@@ -1,5 +1,6 @@
 from datetime import datetime
 from sqlmodel import (
+    BIGINT,
     JSON,
     BigInteger,
     Column,
@@ -26,7 +27,7 @@ from app.models.enums import (
     StatusEnum,
 )
 from app.models.mixins import TimestampMixin
-from hydra_types.telemetry import LogLevelEnum
+from hydra_types.telemetry import LogLevelEnum, TraceEvent
 
 
 def now():
@@ -478,17 +479,17 @@ class Trace(SQLModel, table=True):
         Index("idx_parent_span", "parent_span_id"),
     )
 
-    id: str = Field(primary_key=True)
+    id: str = Field(primary_key=True, default_factory=cuid)
     trace_id: str = Field(max_length=64, index=True)
     span_id: str = Field(max_length=64)
     parent_span_id: Optional[str] = Field(default=None, max_length=64)
     operation_name: str = Field(max_length=255)
-    start_time: int
-    end_time: Optional[int] = None
-    duration_ms: Optional[float] = None
+    start_time: datetime = Field(default_factory=now)
+    end_time: Optional[datetime] = None
+    duration_ms: Optional[str] = None
     status: str = Field(max_length=32)
     attributes: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    events: Optional[List[Dict[str, Any]]] = Field(default=None, sa_column=Column(JSON))
+    events: Optional[List[TraceEvent]] = Field(default=None, sa_column=Column(JSON))
     service_name: str = Field(max_length=128)
     service_version: str = Field(max_length=128)
     organization_id: str = Field(foreign_key="organizations.id")

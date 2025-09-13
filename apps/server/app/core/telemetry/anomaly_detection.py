@@ -1,10 +1,6 @@
+from typing import Dict, List
 import numpy as np
-from datetime import datetime
-from typing import List, Dict, Optional, Any
-from dataclasses import dataclass
-from enum import Enum
 import statistics
-from pydantic import BaseModel
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 from app.core.types.aggregate_telemetry import (
@@ -12,110 +8,17 @@ from app.core.types.aggregate_telemetry import (
     LogAggregationData,
 )
 from hydra_types.telemetry import TelemetryBatch
+from app.core.types.anomaly import (
+    SeverityLevel,
+    AnomalyType,
+    AnomalyThresholds,
+    AnomalyDetection,
+)
+from app.core.telemetry.metric_analyzer import MetricAnalyzer
 from app.utils.logging import create_logger
+from app.core.helpers.emit_distress import emit_distress
 
 logger = create_logger(__name__)
-
-
-class AnomalyType(Enum):
-    HIGH_ERROR_RATE = "high_error_rate"
-    INCREASED_LATENCY = "increased_latency"
-    RESOURCE_SPIKE = "resource_spike"
-    VERSION_REGRESSION = "version_regression"
-    STATISTICAL_OUTLIER = "statistical_outlier"
-
-
-class SeverityLevel(Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
-
-
-@dataclass
-class AnomalyThresholds:
-    """Configuration for anomaly detection thresholds"""
-
-    error_rate_absolute: float = 60.0  # Absolute error rate threshold (%)
-    error_rate_increase: float = 20.0  # Percentage increase threshold
-    latency_increase: float = 50.0  # Percentage increase threshold
-    resource_increase: float = 40.0  # Percentage increase threshold
-    isolation_forest_contamination: float = 0.1
-    historical_window_hours: int = 24
-
-
-class AnomalyDetection(BaseModel):
-    """Represents a detected anomaly"""
-
-    anomaly_type: AnomalyType
-    severity: SeverityLevel
-    service_name: str
-    service_version: str
-    timestamp: datetime
-    current_value: float
-    baseline_value: Optional[float] = None
-    percentage_change: Optional[float] = None
-    description: str = ""
-    metadata: Dict[str, Any] = {}
-
-
-class MetricAnalyzer:
-    """Helper class for analyzing specific metrics"""
-
-    def __init__(self):
-        self.resource_metrics = [
-            "cpu.usage",
-            "memory.usage",
-            "disk.io",
-            "network.io",
-            "http.request.duration_ms",
-            "database.query.duration_ms",
-        ]
-        self.latency_metrics = [
-            "http.request.duration_ms",
-            "response.time",
-            "database.query.duration_ms",
-            "api.latency",
-            "request.duration",
-        ]
-
-    def is_resource_metric(self, metric_name: str) -> bool:
-        """Check if a metric represents resource consumption"""
-        return any(
-            resource in metric_name.lower() for resource in self.resource_metrics
-        )
-
-    def is_latency_metric(self, metric_name: str) -> bool:
-        """Check if a metric represents latency"""
-        return any(latency in metric_name.lower() for latency in self.latency_metrics)
-
-    def calculate_error_rate(self, batch: "TelemetryBatch") -> float:
-        """Calculate error rate from telemetry batch"""
-        if not batch.logs:
-            return 0.0
-
-        total_logs = len(batch.logs)
-        error_logs = sum(1 for log in batch.logs if log.level in ["ERROR", "FATAL"])
-
-        return (error_logs / total_logs) * 100.0 if total_logs > 0 else 0.0
-
-    def extract_metrics_data(self, batch: "TelemetryBatch") -> Dict[str, List[float]]:
-        """Extract metric values grouped by metric name"""
-        metrics_data = {}
-
-        for metric in batch.metrics:
-            if metric.metric_name not in metrics_data:
-                metrics_data[metric.metric_name] = []
-            metrics_data[metric.metric_name].append(metric.value)
-
-        return metrics_data
-
-
-def emit_distress():
-    """Mock method to emit distress signals when anomalies are detected"""
-    logger.critical("🚨 DISTRESS SIGNAL EMITTED - Critical anomaly detected!")
-    # In real implementation, this would trigger alerts, notifications, etc.
-    pass
 
 
 class AnomalyDetectionEngine:

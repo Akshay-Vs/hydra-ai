@@ -1,3 +1,4 @@
+```mermaid
 ---
 config:
   theme: dark
@@ -60,3 +61,4 @@ flowchart TB
     style P fill:#fff3e0,color:#000000
     style Z fill:#fff9c4,color:#000000
     style CC fill:#e8f5e8,color:#000000
+```

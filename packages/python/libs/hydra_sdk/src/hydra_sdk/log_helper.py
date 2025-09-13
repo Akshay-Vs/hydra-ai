@@ -4,13 +4,14 @@ from hydra_types.telemetry import Log, LogLevelEnum
 
 from hydra_sdk.utils import _now
 
+import os
 
 class LogHelper:
     """Helper class for structured logging with trace context"""
 
     def __init__(self, service_name: str, service_version: str):
         self.service_name = service_name
-        self.service_version = service_version
+        self.service_version = service_version or os.getenv("HYDRA_SERVICE_VERSION")
         self._log_callback: Optional[Callable[[Log], Awaitable[None]]] = None
         self._trace_context_provider: Optional[
             Callable[[], tuple[Optional[str], Optional[str]]]

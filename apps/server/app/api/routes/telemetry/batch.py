@@ -29,7 +29,7 @@ def receive_batch(
     """
     Receive a batch of data for processing.
     """
-    logger.debug(f"Authenticated as {client}")
+    logger.debug(f"Batched received, Authenticated as {client}")
 
     telemetry_processor = TelemetryDataProcessor(session)
 
@@ -77,5 +77,5 @@ def receive_batch(
         logger.info("No anomalies detected")
         return {"status": "success", "message": "Batch received successfully"}
 
-    for anomaly in anomalies:
-        logger.info(f"Anomaly detected: {anomaly.model_dump_json(indent=2)}")
+    # for anomaly in anomalies:
+       # logger.info(f"Anomaly detected: {anomaly.model_dump_json(indent=2)}")

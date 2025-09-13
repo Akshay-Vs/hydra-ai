@@ -1,6 +1,6 @@
 from typing import List, Optional
 from datetime import datetime
-from sqlmodel import col, select, func, desc
+from sqlmodel import col, select, func, desc, text
 
 
 from app.core.types.aggregate_telemetry import (
@@ -386,3 +386,79 @@ class AggregateReader:
 
         results = list(self.session.exec(anomaly_statement).all())
         return [MetricAggregationData(**row._mapping) for row in results]
+
+    def get_version_metrics_summary(
+        self,
+        organization_id: str,
+        start_time: datetime,
+        end_time: datetime,
+        n_versions: int = 3,
+        n_logs: int = 20,
+    ):
+        """Get summary of all metrics for a service within time range.
+        This is a helper function to get a summary of last n versions and logs
+        for a service within a given time range.
+        """
+        query = text("""
+            WITH version_windows AS (
+                SELECT service_name,
+                       service_version,
+                       MIN(timestamp) AS version_start,
+                       MAX(timestamp) AS version_end
+                FROM metric_aggregations_1m
+                WHERE organization_id = :org_id
+                GROUP BY service_name, service_version
+            ),
+            ordered_versions AS (
+                SELECT vw.*,
+                       ROW_NUMBER() OVER (PARTITION BY service_name ORDER BY version_start DESC) AS rn
+                FROM version_windows vw
+            ),
+            last_n_versions AS (
+                SELECT *
+                FROM ordered_versions
+                WHERE rn <= :n_versions
+            ),
+            latest_update AS (
+                SELECT service_name,
+                       MAX(version_start) AS last_update_time
+                FROM last_n_versions
+                GROUP BY service_name
+            )
+            SELECT m.timestamp,
+                   m.service_name,
+                   m.service_version,
+                   lnv.version_start,
+                   lnv.version_end,
+                   lu.last_update_time,
+                   m.metric_name,
+                   m.avg_value,
+                   m.min_value,
+                   m.max_value,
+                   m.count_values,
+                   m.sum_values,
+                   m.p50_value,
+                   m.p95_value,
+                   m.p99_value,
+                   m.stddev_value
+            FROM metric_aggregations_1m m
+            JOIN last_n_versions lnv
+              ON m.service_name = lnv.service_name
+             AND m.service_version = lnv.service_version
+            JOIN latest_update lu
+              ON m.service_name = lu.service_name
+              AND m.organization_id = :org_id
+            ORDER BY m.timestamp DESC
+            LIMIT :n_logs;
+        """)
+        result = self.session.execute(
+            query,
+            {
+                "start_time": start_time,
+                "end_time": end_time,
+                "org_id": organization_id,
+                "n_versions": n_versions,  # number of versions to fetch
+                "n_logs": n_logs,  # number of log rows to fetch
+            },
+        )
+        return [row for row in result]

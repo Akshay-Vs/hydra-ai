@@ -71,12 +71,8 @@ class AnomalyDetectionEngine:
                     f"Detected {len(anomalies)} anomalies in telemetry batch"
                 )
 
-                # Emit distress for critical anomalies
-                critical_anomalies = [
-                    a for a in anomalies if a.severity == SeverityLevel.CRITICAL
-                ]
-                if critical_anomalies:
-                    emit_distress()
+                for anomaly in anomalies:
+                    emit_distress(anomaly)
 
         except Exception as e:
             logger.error(f"Error during anomaly detection: {e}")
@@ -105,7 +101,8 @@ class AnomalyDetectionEngine:
             anomalies.append(anomaly)
 
             # Emit distress for high error rate
-            emit_distress()
+            if error_rate > self.thresholds.distress_error_rate:
+                emit_distress(anomaly)
 
         return anomalies
 
@@ -232,8 +229,8 @@ class AnomalyDetectionEngine:
                 anomalies.append(anomaly)
 
                 # Emit distress for significant increases
-                if percentage_change > 100:  # 100% increase
-                    emit_distress()
+                if percentage_change > AnomalyThresholds.distress_historical_diff:
+                    emit_distress(anomaly)
 
         # Compare error rates
         current_error_rate = self.metric_analyzer.calculate_error_rate(batch)
@@ -259,8 +256,10 @@ class AnomalyDetectionEngine:
                 )
                 anomalies.append(anomaly)
 
-                if error_rate_change > 50:  # 50% increase in error rate
-                    emit_distress()
+                if (
+                    error_rate_change > AnomalyThresholds.distress_error_rate
+                ):  # 50% increase in error rate
+                    emit_distress(anomaly)
 
         return anomalies
 
@@ -340,8 +339,8 @@ class AnomalyDetectionEngine:
                 )
                 anomalies.append(anomaly)
 
-                if percentage_change > 75:  # Significant regression
-                    emit_distress()
+                if percentage_change > AnomalyThresholds.distress_version_regression:
+                    emit_distress(anomaly)
 
         return anomalies
 

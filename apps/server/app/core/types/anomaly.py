@@ -29,6 +29,9 @@ class AnomalyThresholds(BaseModel):
     resource_increase: float = 40.0  # Percentage increase threshold
     isolation_forest_contamination: float = 0.1
     historical_window_hours: int = 24
+    distress_historical_diff: int = 50  # Percentage difference threshold
+    distress_error_rate: int = 25  # Percentage error rate threshold
+    distress_version_regression: int = 75  # Percentage regression threshold
 
 
 class AnomalyAlert(BaseModel):

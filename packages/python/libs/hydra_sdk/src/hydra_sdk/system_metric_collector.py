@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Callable, Awaitable, Optional
 from hydra_types.telemetry import Metric
 import psutil
-
+import os
 
 class SystemMetricsCollector:
     """Collects system and process metrics for telemetry"""
@@ -13,7 +13,7 @@ class SystemMetricsCollector:
         self, service_name: str, service_version: str, metrics_interval: float = 60.0
     ):
         self.service_name = service_name
-        self.service_version = service_version
+        self.service_version = service_version or os.getenv("HYDRA_SERVICE_VERSION")
         self.metrics_interval = metrics_interval
         self.logger = logging.getLogger(__name__)
         self._process = psutil.Process()

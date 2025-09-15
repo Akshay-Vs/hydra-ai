@@ -7,10 +7,12 @@ from app.core.auth.m2m_auth import get_current_client
 from app.core.helpers.telemetry_data_processor import TelemetryDataProcessor
 from app.core.types.auth_type import SessionClient
 from app.services.database_service import get_db_session
-from app.services.telemetry_service import TelemetryService
 from app.utils.logging import create_logger
 from app.core.database.aggregate_reader import AggregateReader
-from app.core.telemetry.anomaly_detection import TelemetryAnomalyDetector
+from app.core.telemetry.anomaly_detection import (
+    AnomalyDetectionEngine,
+    AnomalyThresholds,
+)
 
 from app.utils.threads import fire_and_forget
 
@@ -27,13 +29,9 @@ def receive_batch(
     """
     Receive a batch of data for processing.
     """
-    logger.debug(f"Authenticated as {client}")
-    logger.debug(f"Received: {batch.model_dump_json(indent=2)}")
+    logger.debug(f"Batched received, Authenticated as {client}")
 
     telemetry_processor = TelemetryDataProcessor(session)
-
-    telemetry_service = TelemetryService(session)
-    telemetry_service.auto_aggregate(client.organization_id)
 
     if not client.organization_id:
         logger.error("Client does not have an associated organization_id")
@@ -58,14 +56,26 @@ def receive_batch(
         end_time=datetime.now(),
     )
 
-    # Initialize and train detector
-    detector = TelemetryAnomalyDetector(n_trees=30, contamination=0.05)
-    detector.fit(historic_metrics=historic_metrics, historic_logs=historic_logs)
+    # Initialize the engine
+    logger.info("Initializing anomaly detection engine")
+    thresholds = AnomalyThresholds(
+        error_rate_absolute=60.0,
+        error_rate_increase=25.0,
+        latency_increase=50.0,
+        resource_increase=40.0,
+    )
 
-    # Predict anomalies
-    results = detector.predict_batch(batch)
+    engine = AnomalyDetectionEngine(thresholds)
 
-    # Print results
-    detector.print_results(results)
+    # Detect anomalies
+    logger.info("Detecting anomalies")
+    anomalies = engine.detect_anomalies(batch, historic_metrics, historic_logs)
 
-    return {"status": "success", "message": "Batch received successfully"}
+    # Process results
+    logger.info("Processing anomalies")
+    if not anomalies:
+        logger.info("No anomalies detected")
+        return {"status": "success", "message": "Batch received successfully"}
+
+    # for anomaly in anomalies:
+       # logger.info(f"Anomaly detected: {anomaly.model_dump_json(indent=2)}")

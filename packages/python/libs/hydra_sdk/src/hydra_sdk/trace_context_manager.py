@@ -4,13 +4,15 @@ from contextlib import asynccontextmanager
 from typing import Optional, Dict, Any, Callable, Awaitable
 from hydra_types.telemetry import Trace
 
+import os
+
 
 class TraceContextManager:
     """Manages distributed tracing context and span creation"""
 
     def __init__(self, service_name: str, service_version: str):
         self.service_name = service_name
-        self.service_version = service_version
+        self.service_version = service_version or os.getenv("HYDRA_SERVICE_VERSION")
         self._current_trace_id: Optional[str] = None
         self._current_span_id: Optional[str] = None
         self._trace_callback: Optional[Callable[[Trace], Awaitable[None]]] = None
